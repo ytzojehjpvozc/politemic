@@ -1,0 +1,2 @@
+# 不要删
+org.springframework.boot.env.EnvironmentPostProcessor=com.xbh.politemic.common.config.CustomEnvironmentPostProcessor
