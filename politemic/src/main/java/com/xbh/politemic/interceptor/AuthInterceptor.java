@@ -44,42 +44,39 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
-        if (handler instanceof HandlerMethod) {
-            HandlerMethod handlerMethod = (HandlerMethod) handler;
-            // 获取请求对应控制器上的NoneNeedLogin注解
-            NoneNeedLogin noneNeedLogin = handlerMethod.getMethodAnnotation(NoneNeedLogin.class);
-            if (noneNeedLogin == null) {
-                // 拿到请求中的令牌
-                String token = ServletUtil.getHeaderIgnoreCase(request, Constants.TOKEN);
-                if (StrUtil.isBlank(token)) {
-                    this.responseMsg(response, Result.noneAuth().toJsonString());
-                    return Boolean.FALSE;
-                }
-                // 查询redis中是否存在
-                String realTokenKey = Constants.USER_TOKEN_PRE + token;
-                if (redisClient.hasKey(realTokenKey)) {
-                    // 存在则比对token的值,相等则放行
-                    String userId = redisClient.get(realTokenKey);
-                    // 设置日志标志
-                    this.setMDC(userId);
-                    // 设置用户id至本地线程副本中
-                    ThreadLocalUtils.setUserId(userId);
-                    return Boolean.TRUE;
-                } else {
-                    UserToken userToken = userTokenMapper.selectOne(new UserToken().setToken(token));
-                    // 数据库中能查到且到期时间在当前时间之后 则放行
-                    if (userToken != null && userToken.getExpire().after(new Date(System.currentTimeMillis()))) {
-                        // 设置日志标志
-                        this.setMDC(userToken.getUserId());
-                        // 设置用户id至本地线程副本中
-                        ThreadLocalUtils.setUserId(userToken.getUserId());
-                        return Boolean.TRUE;
-                    }
-                }
-                // 不存在则拦截 让用户去登录
+        // 获取请求对应控制器上的NoneNeedLogin注解
+        NoneNeedLogin noneNeedLogin = ((HandlerMethod) handler).getMethodAnnotation(NoneNeedLogin.class);
+        if (noneNeedLogin == null) {
+            // 拿到请求中的令牌
+            String token = ServletUtil.getHeaderIgnoreCase(request, Constants.TOKEN);
+            if (StrUtil.isBlank(token)) {
                 this.responseMsg(response, Result.noneAuth().toJsonString());
                 return Boolean.FALSE;
             }
+            // 查询redis中是否存在
+            String realTokenKey = Constants.USER_TOKEN_PRE + token;
+            if (redisClient.hasKey(realTokenKey)) {
+                // 存在则比对token的值,相等则放行
+                String userId = redisClient.get(realTokenKey);
+                // 设置日志标志
+                this.setMDC(userId);
+                // 设置用户id至本地线程副本中
+                ThreadLocalUtils.setUserId(userId);
+                return Boolean.TRUE;
+            } else {
+                UserToken userToken = userTokenMapper.selectOne(new UserToken().setToken(token));
+                // 数据库中能查到且到期时间在当前时间之后 则放行
+                if (userToken != null && userToken.getExpire().after(new Date(System.currentTimeMillis()))) {
+                    // 设置日志标志
+                    this.setMDC(userToken.getUserId());
+                    // 设置用户id至本地线程副本中
+                    ThreadLocalUtils.setUserId(userToken.getUserId());
+                    return Boolean.TRUE;
+                }
+            }
+            // 不存在则拦截 让用户去登录
+            this.responseMsg(response, Result.noneAuth().toJsonString());
+            return Boolean.FALSE;
         }
         return Boolean.TRUE;
         // return super.preHandle(request, response, handler);

@@ -1,14 +1,11 @@
 package com.xbh.politemic.biz.user.controller;
 
-import com.xbh.politemic.biz.user.domain.SysUser;
 import com.xbh.politemic.biz.user.srv.UserSrv;
 import com.xbh.politemic.common.annotation.NoneNeedLogin;
 import com.xbh.politemic.common.annotation.SysLog;
 import com.xbh.politemic.common.constant.Constants;
+import com.xbh.politemic.biz.user.domain.SysUser;
 import com.xbh.politemic.common.util.Result;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
  * @Author: zhengbohang
  * @Date: 2021/10/3 13:45
  */
-@Api(tags = "用户模块")
 @RestController
 @RequestMapping("/user/user")
 public class UserController {
@@ -26,8 +22,6 @@ public class UserController {
     private UserSrv userSrv;
 
     @NoneNeedLogin
-    @ApiOperation("测试接口")
-    @ApiImplicitParam(name = "test", value = "测试参数一", required = true)
     @PostMapping("test")
     @SysLog(modelName = Constants.USER_MODEL_NAME, behavior = "用于测试", remark = "test可选")
     public Result test(@RequestParam(name = "test") String test) throws Exception {
