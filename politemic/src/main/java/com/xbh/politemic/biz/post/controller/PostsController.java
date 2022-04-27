@@ -20,13 +20,6 @@ public class PostsController {
     @Autowired
     private PostSrv postSrv;
 
-    /**
-     * 发布帖子
-     * @param discussPosts
-     * @return: com.xbh.politemic.common.util.Result
-     * @author: ZBoHang
-     * @time: 2021/11/24 9:29
-     */
     @RequestMapping("publishPosts")
     public Result publishPosts(@RequestBody(required = false) DiscussPosts discussPosts) {
         return this.postSrv.publishPost(discussPosts);
