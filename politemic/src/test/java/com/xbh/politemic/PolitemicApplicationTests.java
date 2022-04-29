@@ -1,29 +1,15 @@
 package com.xbh.politemic;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.xbh.politemic.biz.notice.mapper.NoticeMapper;
-import com.xbh.politemic.biz.user.mapper.SysUserMapper;
-import com.xbh.politemic.task.AsyncTask;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.env.Environment;
-
-import javax.annotation.Resource;
 
 @SpringBootTest
 class PolitemicApplicationTests {
 
     @Autowired
-    Environment environment;
-    @Resource
-    SysUserMapper sysUserMapper;
-    @Autowired
     LoadingCache<String, String> loadingCache;
-    @Autowired
-    AsyncTask asyncTask;
-    @Resource
-    NoticeMapper noticeMapper;
 
     @Test
     void contextLoads() throws Exception {

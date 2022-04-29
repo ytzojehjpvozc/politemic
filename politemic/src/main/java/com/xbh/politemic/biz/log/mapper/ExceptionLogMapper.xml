@@ -19,8 +19,4 @@
     <result column="trace" jdbcType="LONGVARCHAR" property="trace" />
   </resultMap>
 
-  <insert id="insertBackPrimaryKey" useGeneratedKeys="true" keyProperty="id">
-    insert into sys_exception_log(trace, datetime) values(#{trace}, #{datetime})
-  </insert>
-
 </mapper>

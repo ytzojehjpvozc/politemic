@@ -4,11 +4,11 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.rabbitmq.client.Channel;
-import com.xbh.politemic.common.constant.Constants;
 import com.xbh.politemic.biz.queue.domain.QueueMsg;
+import com.xbh.politemic.biz.queue.srv.BaseQueueSrv;
 import com.xbh.politemic.biz.user.domain.SysUser;
-import com.xbh.politemic.biz.queue.mapper.QueueMsgMapper;
-import com.xbh.politemic.biz.user.mapper.SysUserMapper;
+import com.xbh.politemic.biz.user.srv.BaseUserSrv;
+import com.xbh.politemic.common.constant.Constants;
 import com.xbh.politemic.common.util.StrKit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -20,7 +20,6 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.HashMap;
@@ -46,10 +45,10 @@ public class TakeTailQueue {
 
     @Autowired
     private RabbitTemplate tailRabbitTemplate;
-    @Resource
-    private QueueMsgMapper queueMsgMapper;
-    @Resource
-    private SysUserMapper sysUserMapper;
+    @Autowired
+    private BaseQueueSrv baseQueueSrv;
+    @Autowired
+    private BaseUserSrv baseUserSrv;
 
 
     /**
@@ -111,9 +110,9 @@ public class TakeTailQueue {
     @Transactional(rollbackFor = Exception.class)
     void customOverModifyMsgStatus(String msgId, String userId, String tailStr) {
         // 修改对应用户的尾巴
-        this.sysUserMapper.updateByPrimaryKeySelective(new SysUser().setId(userId).setTail(tailStr));
+        this.baseUserSrv.updateByPrimaryKeySelective(new SysUser().setId(userId).setTail(tailStr));
         // 修改尾巴消息 中id为 ** 的消息
-        this.queueMsgMapper.updateByPrimaryKeySelective(new QueueMsg()
+        this.baseQueueSrv.updateByPrimaryKeySelective(new QueueMsg()
                 .setId(msgId)
                 .setStatus(Constants.MSG_CONSUMED_STATUS)
                 .setConsumTime(new Timestamp(System.currentTimeMillis())));
@@ -142,7 +141,7 @@ public class TakeTailQueue {
                             .setStatus(Constants.MSG_INITIAL_STATUS)
                             .setType(Constants.MSG_TYPE_TAIL);
         // 推送队列前持久化
-        this.queueMsgMapper.insertSelective(queueMsg);
+        this.baseQueueSrv.insertSelective(queueMsg);
         // 推入队列
         this.send(content, msgId);
     }

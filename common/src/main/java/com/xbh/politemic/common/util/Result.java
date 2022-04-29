@@ -14,7 +14,7 @@ import java.io.Serializable;
 @Getter
 public class Result implements Serializable {
 
-    private String code;
+    private Integer code;
     private String msg;
     private Object bean;
 
@@ -54,6 +54,13 @@ public class Result implements Serializable {
         Result result = new Result();
         result.code = ResultEnum.FAILURE.getCode();
         result.msg = message;
+        return result;
+    }
+
+    public static Result failure(Integer code, String msg) {
+        Result result = new Result();
+        result.code = code;
+        result.msg = msg;
         return result;
     }
 

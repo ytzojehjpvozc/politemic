@@ -1,9 +1,9 @@
 package com.xbh.politemic.task;
 
-import com.xbh.politemic.common.imapper.ScheduleTaskMapper;
-import com.xbh.politemic.common.constant.Constants;
 import com.xbh.politemic.biz.queue.domain.QueueMsg;
-import com.xbh.politemic.biz.queue.mapper.QueueMsgMapper;
+import com.xbh.politemic.biz.queue.srv.BaseQueueSrv;
+import com.xbh.politemic.common.constant.Constants;
+import com.xbh.politemic.common.imapper.ScheduleTaskMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +46,8 @@ public class DynamicScheduleTakeTail implements SchedulingConfigurer {
     private Environment environment;
     @Resource
     private ScheduleTaskMapper scheduleTaskMapper;
-    @Resource
-    private QueueMsgMapper queueMsgMapper;
+    @Autowired
+    private BaseQueueSrv baseQueueSrv;
     @Autowired
     private AsyncTask asyncTask;
 
@@ -62,7 +62,7 @@ public class DynamicScheduleTakeTail implements SchedulingConfigurer {
                     .andNotEqualTo(this.STATUS_K, this.STATUS_V)
                     .andGreaterThan(this.CREATE_TIME_K, new Timestamp(System.currentTimeMillis() - this.ONE_DAY));
             // 查找
-            List<QueueMsg> list = this.queueMsgMapper.selectByExample(example);
+            List<QueueMsg> list = this.baseQueueSrv.selectByExample(example);
             // 如果错误消息
             if (!list.isEmpty()) {
                 // TODO: 2021/10/15 尾巴后续可能会修改,则需要对比用户是否已经修改过尾巴再进行操作

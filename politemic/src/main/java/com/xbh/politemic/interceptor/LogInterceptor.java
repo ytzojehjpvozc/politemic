@@ -2,10 +2,10 @@ package com.xbh.politemic.interceptor;
 
 import cn.hutool.extra.servlet.ServletUtil;
 import com.alibaba.fastjson.JSONObject;
-import com.xbh.politemic.common.annotation.SysLog;
 import com.xbh.politemic.bean.RedisClient;
+import com.xbh.politemic.biz.log.srv.BaseSysLogSrv;
+import com.xbh.politemic.common.annotation.SysLog;
 import com.xbh.politemic.common.constant.Constants;
-import com.xbh.politemic.biz.log.mapper.SysLogMapper;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
@@ -13,11 +13,9 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.sql.Timestamp;
@@ -38,8 +36,8 @@ public class LogInterceptor {
      */
     public final String ARR_REPLACE_PASSWORD = "******";
 
-    @Resource
-    private SysLogMapper sysLogMapper;
+    @Autowired
+    private BaseSysLogSrv baseSysLogSrv;
     @Autowired
     RedisClient redisClient;
 
@@ -70,7 +68,7 @@ public class LogInterceptor {
                 .setRemark(sysLogAnno.remark())
                 .setIp(ipAddress).setTime(new Timestamp(System.currentTimeMillis()));
         // 保存
-        this.savaSysLog(sysLog);
+        this.baseSysLogSrv.insertSelective(sysLog);
     }
 
     /**
@@ -91,15 +89,5 @@ public class LogInterceptor {
             return JSONObject.toJSONString(requestParamsMap);
         }
         return JSONObject.toJSONString(Collections.emptyMap());
-    }
-
-    /**
-     * @description: 保存系统日志
-     * @author: zhengbohang
-     * @date: 2021/10/3 19:56
-     */
-    @Transactional(rollbackFor = Exception.class)
-    void savaSysLog(com.xbh.politemic.biz.log.domain.SysLog sysLog) {
-        this.sysLogMapper.insertSelective(sysLog);
     }
 }

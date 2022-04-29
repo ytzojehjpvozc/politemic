@@ -1,9 +1,9 @@
 package com.xbh.politemic.task;
 
-import com.xbh.politemic.common.imapper.ScheduleTaskMapper;
-import com.xbh.politemic.common.constant.Constants;
 import com.xbh.politemic.biz.queue.domain.QueueMsg;
-import com.xbh.politemic.biz.queue.mapper.QueueMsgMapper;
+import com.xbh.politemic.biz.queue.srv.BaseQueueSrv;
+import com.xbh.politemic.common.constant.Constants;
+import com.xbh.politemic.common.imapper.ScheduleTaskMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,8 +45,8 @@ public class DynamicScheduleAnewSendFailureEmail implements SchedulingConfigurer
     private Environment environment;
     @Resource
     private ScheduleTaskMapper scheduleTaskMapper;
-    @Resource
-    private QueueMsgMapper queueMsgMapper;
+    @Autowired
+    private BaseQueueSrv baseQueueSrv;
     @Autowired
     private AsyncTask asyncTask;
 
@@ -61,7 +61,7 @@ public class DynamicScheduleAnewSendFailureEmail implements SchedulingConfigurer
             criteria.andNotEqualTo(this.STATUS_K, this.STATUS_V)
                     .andGreaterThan(this.CREATE_TIME_K, new Timestamp(System.currentTimeMillis() - this.ONE_DAY))
                     .andEqualTo(Constants.MSG_TYPE_COLUMN_NAME, Constants.MSG_TYPE_EMAIL);
-            List<QueueMsg> list = this.queueMsgMapper.selectByExample(example);
+            List<QueueMsg> list = this.baseQueueSrv.selectByExample(example);
             if (list != null && !list.isEmpty()) {
                 this.asyncTask.createActivateEmailMsgs(list);
             }

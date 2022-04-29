@@ -4,7 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import com.xbh.politemic.bean.RedisClient;
 import com.xbh.politemic.biz.user.domain.UserToken;
-import com.xbh.politemic.biz.user.mapper.UserTokenMapper;
+import com.xbh.politemic.biz.user.srv.BaseUserTokenSrv;
 import com.xbh.politemic.common.annotation.NoneNeedLogin;
 import com.xbh.politemic.common.constant.Constants;
 import com.xbh.politemic.common.util.Result;
@@ -18,7 +18,6 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -38,8 +37,8 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     private static final String MDC_KEY = "USER_ID";
     @Autowired
     RedisClient redisClient;
-    @Resource
-    UserTokenMapper userTokenMapper;
+    @Autowired
+    private BaseUserTokenSrv baseUserTokenSrv;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -66,7 +65,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
                     ThreadLocalUtils.setUserId(userId);
                     return Boolean.TRUE;
                 } else {
-                    UserToken userToken = userTokenMapper.selectOne(new UserToken().setToken(token));
+                    UserToken userToken = this.baseUserTokenSrv.selectOne(new UserToken().setToken(token));
                     // 数据库中能查到且到期时间在当前时间之后 则放行
                     if (userToken != null && userToken.getExpire().after(new Date(System.currentTimeMillis()))) {
                         // 设置日志标志

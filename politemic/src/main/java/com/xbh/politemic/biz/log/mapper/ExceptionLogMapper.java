@@ -6,6 +6,4 @@ import com.xbh.politemic.common.imapper.CommonMapper;
 
 public interface ExceptionLogMapper extends CommonMapper<ExceptionLog> {
 
-    Integer insertBackPrimaryKey(ExceptionLog record);
-
 }

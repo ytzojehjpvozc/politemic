@@ -3,13 +3,13 @@ package com.xbh.politemic.bean;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.rabbitmq.client.Channel;
-import com.xbh.politemic.common.constant.Constants;
-import com.xbh.politemic.biz.post.domain.DiscussPosts;
 import com.xbh.politemic.biz.notice.domain.Notice;
+import com.xbh.politemic.biz.notice.srv.BaseNoticeSrv;
+import com.xbh.politemic.biz.post.domain.DiscussPosts;
+import com.xbh.politemic.biz.post.srv.BasePostSrv;
 import com.xbh.politemic.biz.queue.domain.QueueMsg;
-import com.xbh.politemic.biz.post.mapper.DiscussPostsMapper;
-import com.xbh.politemic.biz.notice.mapper.NoticeMapper;
-import com.xbh.politemic.biz.queue.mapper.QueueMsgMapper;
+import com.xbh.politemic.biz.queue.srv.BaseQueueSrv;
+import com.xbh.politemic.common.constant.Constants;
 import com.xbh.politemic.common.util.SensitiveWordFilter;
 import com.xbh.politemic.common.util.StrKit;
 import org.slf4j.Logger;
@@ -23,7 +23,6 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.HashMap;
@@ -55,16 +54,16 @@ public class AuditPostQueue {
      */
     private final String POST_CONTENT_KEY = "content";
 
-    private final String NOTICE_CONTENT = "帖子审核完成,审核结果: {res}!";
+    private final String NOTICE_CONTENT = "帖子审核完成,审核结果: {}!";
 
-    @Resource
-    private QueueMsgMapper queueMsgMapper;
+    @Autowired
+    private BaseQueueSrv baseQueueSrv;
     @Autowired
     private RabbitTemplate auditRabbitTemplate;
-    @Resource
-    private DiscussPostsMapper discussPostsMapper;
-    @Resource
-    private NoticeMapper noticeMapper;
+    @Autowired
+    private BasePostSrv basePostSrv;
+    @Autowired
+    private BaseNoticeSrv baseNoticeSrv;
 
     /**
      * 发送审核消息
@@ -130,13 +129,13 @@ public class AuditPostQueue {
     @Transactional(rollbackFor = Exception.class)
     void customOverModifyMsgStatus(String msgId, String postId, String postAuditStatus, Notice notice) {
         // 保存通知
-        this.noticeMapper.insertUseGeneratedKeys(notice);
+        this.baseNoticeSrv.insertUseGeneratedKeys(notice);
         // 修改帖子的状态
-        this.discussPostsMapper.updateByPrimaryKeySelective(new DiscussPosts()
+        this.basePostSrv.updateByPrimaryKeySelective(new DiscussPosts()
                                                             .setId(postId)
                                                             .setStatus(postAuditStatus));
         // 修改消息状态
-        this.queueMsgMapper.updateByPrimaryKeySelective(new QueueMsg()
+        this.baseQueueSrv.updateByPrimaryKeySelective(new QueueMsg()
                 .setId(msgId)
                 .setStatus(Constants.MSG_CONSUMED_STATUS)
                 .setConsumTime(new Timestamp(System.currentTimeMillis())));
@@ -166,7 +165,7 @@ public class AuditPostQueue {
                 .setStatus(Constants.MSG_INITIAL_STATUS)
                 .setType(Constants.MSG_TYPE_AUDIT);
         // 持久化消息
-        this.queueMsgMapper.insertSelective(queueMsg);
+        this.baseQueueSrv.insertSelective(queueMsg);
         // 发送至队列
         this.send(msgContent, msgId);
     }

@@ -2,9 +2,9 @@ package com.xbh.politemic.bean;
 
 import com.alibaba.fastjson.JSONObject;
 import com.rabbitmq.client.Channel;
-import com.xbh.politemic.common.constant.Constants;
 import com.xbh.politemic.biz.queue.domain.QueueMsg;
-import com.xbh.politemic.biz.queue.mapper.QueueMsgMapper;
+import com.xbh.politemic.biz.queue.srv.BaseQueueSrv;
+import com.xbh.politemic.common.constant.Constants;
 import com.xbh.politemic.common.util.StrKit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -55,8 +55,8 @@ public class MailMsgQueue {
 
     @Autowired
     private RabbitTemplate emailRabbittemplate;
-    @Resource
-    private QueueMsgMapper queueMsgMapper;
+    @Autowired
+    private BaseQueueSrv baseQueueSrv;
     @Autowired
     private MailClient mailClient;
 
@@ -106,21 +106,10 @@ public class MailMsgQueue {
             return;
         }
         // 邮件发送完成若无异常则更新消息状态
-        this.customOverModifyMsgStatus(msgId);
-    }
-
-    /**
-     * 消息消费完成后修改消息表中的状态
-     * @author: ZBoHang
-     * @time: 2021/10/12 17:32
-     */
-    @Transactional(rollbackFor = Exception.class)
-    void customOverModifyMsgStatus(String msgId) {
-        // 修改邮件消息中id为msgId的消息的状态
-        this.queueMsgMapper.updateByPrimaryKeySelective(new QueueMsg()
-                                                    .setId(msgId)
-                                                    .setStatus(Constants.MSG_CONSUMED_STATUS)
-                                                    .setConsumTime(new Timestamp(System.currentTimeMillis())));
+        this.baseQueueSrv.updateByPrimaryKeySelective(new QueueMsg()
+                .setId(msgId)
+                .setStatus(Constants.MSG_CONSUMED_STATUS)
+                .setConsumTime(new Timestamp(System.currentTimeMillis())));
     }
 
     /**
@@ -148,7 +137,7 @@ public class MailMsgQueue {
                                           .setStatus(Constants.MSG_INITIAL_STATUS)
                                           .setType(Constants.MSG_TYPE_EMAIL);
         // 注册邮件推送队列前持久化
-        this.queueMsgMapper.insertSelective(queueMsg);
+        this.baseQueueSrv.insertSelective(queueMsg);
         // 注册邮件推入队列
         this.send(content, msgId);
     }

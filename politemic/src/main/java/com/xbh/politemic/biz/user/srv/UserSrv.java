@@ -2,14 +2,12 @@ package com.xbh.politemic.biz.user.srv;
 
 import cn.hutool.core.util.StrUtil;
 import com.xbh.politemic.bean.RedisClient;
-import com.xbh.politemic.common.constant.Constants;
 import com.xbh.politemic.biz.user.domain.SysUser;
 import com.xbh.politemic.biz.user.domain.UserToken;
-import com.xbh.politemic.biz.user.mapper.SysUserMapper;
-import com.xbh.politemic.biz.user.mapper.UserTokenMapper;
-import com.xbh.politemic.task.AsyncTask;
+import com.xbh.politemic.common.constant.Constants;
 import com.xbh.politemic.common.util.Result;
 import com.xbh.politemic.common.util.StrKit;
+import com.xbh.politemic.task.AsyncTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,16 +51,16 @@ public class UserSrv {
     /**
      * 用户默认头像前缀 感谢https://github.com/multiavatar/multiavatar-php提供的接口
      */
-    private final String HEADER_URL_PRE = "https://api.multiavatar.com/{uid}.svg";
+    private final String HEADER_URL_PRE = "https://api.multiavatar.com/{}.svg";
     /**
      * 用户默认评论尾巴 感谢https://github.com/xenv/gushici提供的接口
      */
     private final String TAIL_URL = "https://v1.jinrishici.com/all.json";
 
+    @Autowired
+    private BaseUserSrv baseUserSrv;
     @Resource
-    private SysUserMapper sysUserMapper;
-    @Resource
-    private UserTokenMapper userTokenMapper;
+    private BaseUserTokenSrv baseUserTokenSrv;
     @Autowired
     private AsyncTask asyncTask;
     @Autowired
@@ -81,7 +79,7 @@ public class UserSrv {
         if (StrUtil.isBlank(userName) || StrUtil.isBlank(userPass)) {
             return Result.failure("用户名或者密码不能为空白");
         }
-        SysUser user = this.sysUserMapper.selectOne(new SysUser().setUserName(userName));
+        SysUser user = this.baseUserSrv.selectOne(new SysUser().setUserName(userName));
         // 使用用户名查找未找见
         if (user == null) {
             return Result.failure("用户名或者密码错误");
@@ -97,7 +95,7 @@ public class UserSrv {
         // 生成一个登录令牌
         String token = StrKit.getUUID();
         // 从数据库中查找是否登录过
-        UserToken userToken = this.userTokenMapper.selectOne(new UserToken().setUserId(user.getId()));
+        UserToken userToken = this.baseUserTokenSrv.selectOne(new UserToken().setUserId(user.getId()));
         String addOrModify;
         if (userToken != null) {
             // 如果登录过
@@ -159,7 +157,7 @@ public class UserSrv {
                 .setHeaderUrl(StrUtil.format(this.HEADER_URL_PRE, id))
                 .setTailStatus(Constants.STATUS_N);
         // 持久化
-        this.saveRegisterInfo(sysUser);
+        this.baseUserSrv.insert(sysUser);
         // 异步交给队列发送邮件
         this.asyncTask.createActivateEmailMsg(sysUser);
         // 异步交给队列获取尾巴
@@ -174,10 +172,12 @@ public class UserSrv {
      */
     public Result activate(String id, String activateCode) {
         // 得到数据库的验证码
-        String validCode = this.sysUserMapper.selectByPrimaryKey(id).getActivationCode();
+        String validCode = this.baseUserSrv.selectByPrimaryKey(id).getActivationCode();
         // 若一致 修改用户状态
         if (validCode.equals(activateCode)) {
-            this.modifyUserState(id);
+            this.baseUserSrv.updateByPrimaryKeySelective(new SysUser()
+                    .setId(id)
+                    .setStatus(this.ACTIVATE_STATUS));
             return Result.success("激活成功");
         }
         return Result.failure("激活失败,联系管理处理");
@@ -196,7 +196,7 @@ public class UserSrv {
         criteria.orEqualTo(this.COLUMN_NAME_USERNAME, userName)
                 .orEqualTo(this.COLUMN_NAME_EMAIL, email);
 
-        if (this.sysUserMapper.selectCountByExample(example) > 0) {
+        if (this.baseUserSrv.selectCountByExample(example) > 0) {
             return Boolean.FALSE;
         }
         return Boolean.TRUE;
@@ -210,32 +210,11 @@ public class UserSrv {
     @Transactional(rollbackFor = Exception.class)
     void saveUserToken(UserToken userToken, String addOrModify) {
         if (StrUtil.equals(this.TOKEN_ADD, addOrModify)) {
-            this.userTokenMapper.insert(userToken);
+            this.baseUserTokenSrv.insert(userToken);
         }
         if (StrUtil.equals(this.TOKEN_MODIFY, addOrModify)) {
-            this.userTokenMapper.updateByPrimaryKey(userToken);
+            this.baseUserTokenSrv.updateByPrimaryKey(userToken);
         }
-        redisClient.set(Constants.USER_TOKEN_PRE + userToken.getToken(), userToken.getUserId(), Constants.TOKEN_TIME_OUT);
-    }
-
-    /**
-     *  激活成功后修改用户状态
-     * @author: zhengbohang
-     * @date: 2021/10/4 16:45
-     */
-    @Transactional(rollbackFor = Exception.class)
-    void modifyUserState(String id) {
-        this.sysUserMapper.updateByPrimaryKeySelective(new SysUser().setId(id)
-                                                                    .setStatus(this.ACTIVATE_STATUS));
-    }
-
-    /**
-     * @description: 保存注册信息 到mysql
-     * @author: zhengbohang
-     * @date: 2021/10/4 12:37
-     */
-    @Transactional(rollbackFor = Exception.class)
-    void saveRegisterInfo(SysUser sysUser) {
-        this.sysUserMapper.insert(sysUser);
+        this.redisClient.set(Constants.USER_TOKEN_PRE + userToken.getToken(), userToken.getUserId(), Constants.TOKEN_TIME_OUT);
     }
 }

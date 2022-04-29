@@ -2,10 +2,11 @@ package com.xbh.politemic.handler;
 
 import cn.hutool.core.util.StrUtil;
 import com.xbh.politemic.biz.log.domain.ExceptionLog;
-import com.xbh.politemic.biz.log.mapper.ExceptionLogMapper;
+import com.xbh.politemic.biz.log.srv.BaseExceptionLogSrv;
+import com.xbh.politemic.common.exception.ApiException;
+import com.xbh.politemic.common.exception.ServiceException;
 import com.xbh.politemic.common.util.Result;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -25,36 +26,31 @@ public class ExceptionsHandler {
     /**
      * 异常处理 统一返回消息
      */
-    private final String EXCEPTIONS_HANDLER = "请求发生错误,异常id: {id} ,请联系管理员处理";
+    private final String EXCEPTIONS_HANDLER = "请求发生错误,异常序号: {} ,请联系管理员处理";
 
     @Resource
-    ExceptionLogMapper exceptionLogMapper;
+    private BaseExceptionLogSrv baseExceptionLogSrv;
+
+    @ExceptionHandler(ApiException.class)
+    public Result apiExceptionHandler(ApiException ex) {
+        return Result.failure(ex.getCode(), ex.getMsg());
+    }
+
+    @ExceptionHandler(ServiceException.class)
+    public Result srvExceptionHandler(ServiceException ex) {
+        return Result.failure(ex.getCode(), ex.getMsg());
+    }
 
     @ExceptionHandler(Exception.class)
-    public Result handler(Exception ex) {
+    public Result commonExceptionHandler(Exception ex) {
         // 获取堆栈信息
         String trace = this.getTrace(ex);
         // 持久化
-        Integer id = this.saveException(trace);
+        Integer id = this.baseExceptionLogSrv.insertUseGeneratedKeys(new ExceptionLog()
+                .setTrace(trace)
+                .setDatetime(new Timestamp(System.currentTimeMillis())));
         // 返回给客户端错误id
         return Result.failure(StrUtil.format(this.EXCEPTIONS_HANDLER, id));
-    }
-
-    /**
-     * @description: 保存异常记录
-     * @author: zhengbohang
-     * @date: 2021/10/3 11:12
-     */
-    @Transactional(rollbackFor = Exception.class)
-    Integer saveException(String traceMsg){
-        ExceptionLog exceptionLog = new ExceptionLog();
-        try {
-            exceptionLogMapper.insertBackPrimaryKey(exceptionLog.setTrace(traceMsg)
-                                                        .setDatetime(new Timestamp(System.currentTimeMillis())));
-        } catch (Exception e) {
-            log.info("@@@@@@请注意,异常日志保存失败");
-        }
-        return exceptionLog.getId();
     }
 
     /**

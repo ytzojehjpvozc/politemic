@@ -2,19 +2,20 @@ package com.xbh.politemic.common.enums;
 
 public enum ResultEnum {
 
-    SUCCESS("200", "成功"),
-    FAILURE("500", "失败"),
-    NONE_AUTH("401", "没有权限");
+    SUCCESS(200, "请求成功"),
+    FAILURE(500, "服务器内部异常"),
+    PARAMS_NONE_PASS(400, "参数校验未通过"),
+    NONE_AUTH(401, "本次访问没有权限");
 
-    private String code;
+    private Integer code;
     private String msg;
 
-    ResultEnum(String code, String msg) {
+    ResultEnum(Integer code, String msg) {
         this.code = code;
         this.msg = msg;
     }
 
-    public String getCode() {
+    public Integer getCode() {
         return this.code;
     }
 
