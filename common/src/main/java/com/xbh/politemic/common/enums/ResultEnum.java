@@ -3,9 +3,9 @@ package com.xbh.politemic.common.enums;
 public enum ResultEnum {
 
     SUCCESS(200, "请求成功"),
-    FAILURE(500, "服务器内部异常"),
     PARAMS_NONE_PASS(400, "参数校验未通过"),
-    NONE_AUTH(401, "本次访问没有权限");
+    NONE_AUTH(401, "本次访问没有权限"),
+    FAILURE(500, "服务器内部异常"),;
 
     private Integer code;
     private String msg;

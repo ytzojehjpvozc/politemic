@@ -6,6 +6,7 @@ import com.xbh.politemic.biz.user.domain.SysUser;
 import com.xbh.politemic.biz.user.domain.UserToken;
 import com.xbh.politemic.common.constant.Constants;
 import com.xbh.politemic.common.util.Result;
+import com.xbh.politemic.common.util.ServiceAssert;
 import com.xbh.politemic.common.util.StrKit;
 import com.xbh.politemic.task.AsyncTask;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import javax.annotation.Resource;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,7 +59,7 @@ public class UserSrv {
 
     @Autowired
     private BaseUserSrv baseUserSrv;
-    @Resource
+    @Autowired
     private BaseUserTokenSrv baseUserTokenSrv;
     @Autowired
     private AsyncTask asyncTask;
@@ -74,42 +74,43 @@ public class UserSrv {
      * @date: 2021/10/3 15:29
      */
     public Result doLogin(String userName, String userPass) {
+
+        ServiceAssert.isFalse(StrUtil.isBlank(userName) || StrUtil.isBlank(userPass), "用户名或者密码不能为空白!");
         // 返回map
         Map<String, Object> resMap = new HashMap<>(16);
-        if (StrUtil.isBlank(userName) || StrUtil.isBlank(userPass)) {
-            return Result.failure("用户名或者密码不能为空白");
-        }
+
         SysUser user = this.baseUserSrv.selectOne(new SysUser().setUserName(userName));
         // 使用用户名查找未找见
-        if (user == null) {
-            return Result.failure("用户名或者密码错误");
-        }
+        ServiceAssert.notNull(user, "用户名或者密码错误!");
+
         String encryptPass = StrKit.MD5Code(userPass + user.getSalt());
-        if (!StrUtil.equals(user.getUserPass(), encryptPass)) {
-            // TODO: 2021/10/9 登录失败 次数校验
-            return Result.failure("用户名或者密码错误");
-        }
-        if (StrUtil.equals(Constants.DEFAULT_REGISTER_STATUS, user.getStatus())) {
-            return Result.failure("用户处于未激活状态");
-        }
+
+        ServiceAssert.isTrue(StrUtil.equals(user.getUserPass(), encryptPass), "用户名或者密码错误!");
+        // TODO: 2021/10/9 登录失败 次数校验
+        ServiceAssert.isFalse(StrUtil.equals(Constants.DEFAULT_REGISTER_STATUS, user.getStatus()), "用户处于未激活状态!");
         // 生成一个登录令牌
         String token = StrKit.getUUID();
         // 从数据库中查找是否登录过
         UserToken userToken = this.baseUserTokenSrv.selectOne(new UserToken().setUserId(user.getId()));
+
         String addOrModify;
+
         if (userToken != null) {
             // 如果登录过
             addOrModify = this.TOKEN_MODIFY;
         } else {
             // 如果没有登录过
             addOrModify = this.TOKEN_ADD;
+
             userToken = new UserToken();
         }
-        userToken.setUserId(user.getId());
-        userToken.setToken(token);
-        userToken.setExpire(new Timestamp(System.currentTimeMillis() + Constants.TOKEN_TIME_OUT));
+
+        userToken.setUserId(user.getId())
+                .setToken(token)
+                .setExpire(new Timestamp(System.currentTimeMillis() + Constants.TOKEN_TIME_OUT));
         // 保存token
         this.saveUserToken(userToken, addOrModify);
+
         resMap.put("token", userToken);
         // TODO: 2021/10/12 登录后的数据返回
         return Result.success(resMap);
