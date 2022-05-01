@@ -3,8 +3,10 @@ package com.xbh.politemic.bean;
 import com.alibaba.fastjson.JSONObject;
 import com.rabbitmq.client.Channel;
 import com.xbh.politemic.biz.queue.domain.QueueMsg;
+import com.xbh.politemic.biz.queue.dto.QueueDTO;
 import com.xbh.politemic.biz.queue.srv.BaseQueueSrv;
 import com.xbh.politemic.common.constant.Constants;
+import com.xbh.politemic.common.constant.QueueConstant;
 import com.xbh.politemic.common.util.StrKit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -16,9 +18,7 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -68,7 +68,7 @@ public class MailMsgQueue {
      * @date: 2021/10/5 15:22
      */
     public void send(String msgContent, String correlationData) {
-        this.emailRabbittemplate.convertAndSend(Constants.EMAIL_EXCHANGE_NAME, "", msgContent, new CorrelationData(correlationData));
+        this.emailRabbittemplate.convertAndSend(QueueConstant.EMAIL_EXCHANGE_NAME, "", msgContent, new CorrelationData(correlationData));
     }
 
     /**
@@ -76,11 +76,11 @@ public class MailMsgQueue {
      * @author: zhengbohang
      * @date: 2021/10/5 17:48
      */
-    @RabbitListener(queues = Constants.EMAIL_EXCHANGE_BIND_QUEUE_NAME)
+    @RabbitListener(queues = QueueConstant.EMAIL_EXCHANGE_BIND_QUEUE_NAME)
     public void msgConsumer(String message, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long tag) {
         JSONObject msg = JSONObject.parseObject(message);
         log.info("@@@@@收到mq的消息: " + msg.toJSONString());
-        String msgId = msg.getString(Constants.MSG_ID_COLUMN_NAME);
+        String msgId = msg.getString(QueueConstant.MSG_ID_COLUMN_NAME);
         String toUser = msg.getString(this.REGISTER_EMAIL_RECEIVER_KEY);
         String subject = msg.getString(this.REGISTER_EMAIL_SUBJECT_KEY);
         String content = msg.getString(this.REGISTER_EMAIL_CONTENT_KEY);
@@ -105,11 +105,10 @@ public class MailMsgQueue {
             // 失败则返回,不更新状态
             return;
         }
+        // 构建一个被消费状态的消息
+        QueueMsg queueMsg = QueueDTO.buildConsumedMsg(msgId);
         // 邮件发送完成若无异常则更新消息状态
-        this.baseQueueSrv.updateByPrimaryKeySelective(new QueueMsg()
-                .setId(msgId)
-                .setStatus(Constants.MSG_CONSUMED_STATUS)
-                .setConsumTime(new Timestamp(System.currentTimeMillis())));
+        this.baseQueueSrv.updateByPrimaryKeySelective(queueMsg);
     }
 
     /**
@@ -122,21 +121,18 @@ public class MailMsgQueue {
     @Transactional(rollbackFor = Exception.class)
     public void createActivateEmailMsg(String userId, String email) {
         // 将用户数据放入消息中 供后续处理
-        Map<String, String> map = new HashMap<>(4);
+        Map<String, String> map = new HashMap<>(6);
+
         String msgId = StrKit.getUUID();
 
-        map.put(Constants.MSG_ID_COLUMN_NAME, msgId);
+        map.put(QueueConstant.MSG_ID_COLUMN_NAME, msgId);
         map.put(this.REGISTER_EMAIL_RECEIVER_KEY, email);
         map.put(this.REGISTER_EMAIL_SUBJECT_KEY, this.REGISTER_EMAIL_SUBJECT);
         map.put(this.REGISTER_EMAIL_CONTENT_KEY,  this.REGISTER_EMAIL_CONTENT);
         String content = JSONObject.toJSONString(map);
-        // 初始化激活邮件保存进数据库
-        QueueMsg queueMsg = new QueueMsg().setId(msgId)
-                                          .setUserId(userId)
-                                          .setMsgContent(content)
-                                          .setStatus(Constants.MSG_INITIAL_STATUS)
-                                          .setType(Constants.MSG_TYPE_EMAIL);
-        // 注册邮件推送队列前持久化
+        // 初始化激活邮件消息 队列消息表中消息类型 0-邮件消息 1-获取用户评论尾巴消息 2-帖子审核消息
+        QueueMsg queueMsg = QueueDTO.buildInitMsg(msgId, userId, content, Constants.STATUS_STR_ZERO);
+        // 注册邮件推送队列前持久化 保存进数据库
         this.baseQueueSrv.insertSelective(queueMsg);
         // 注册邮件推入队列
         this.send(content, msgId);

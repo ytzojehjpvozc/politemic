@@ -2,10 +2,11 @@ package com.xbh.politemic.interceptor;
 
 import cn.hutool.extra.servlet.ServletUtil;
 import com.alibaba.fastjson.JSONObject;
-import com.xbh.politemic.bean.RedisClient;
+import com.xbh.politemic.biz.log.domain.SysLog;
+import com.xbh.politemic.biz.log.dto.LogDTO;
 import com.xbh.politemic.biz.log.srv.BaseSysLogSrv;
-import com.xbh.politemic.common.annotation.SysLog;
-import com.xbh.politemic.common.constant.Constants;
+import com.xbh.politemic.common.constant.UserConstant;
+import com.xbh.politemic.common.util.ThreadLocalUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
@@ -18,7 +19,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
-import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.Map;
 
@@ -38,8 +38,6 @@ public class LogInterceptor {
 
     @Autowired
     private BaseSysLogSrv baseSysLogSrv;
-    @Autowired
-    RedisClient redisClient;
 
     @Pointcut("@annotation(com.xbh.politemic.common.annotation.SysLog)")
     public void declaratPointCut() {
@@ -48,25 +46,26 @@ public class LogInterceptor {
 
     @After("declaratPointCut()")
     public void after(JoinPoint jp) {
+
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         // 获取请求中的对应信息
-        String userToken = ServletUtil.getHeaderIgnoreCase(request, Constants.TOKEN);
-        String userId = redisClient.get(Constants.USER_TOKEN_PRE + userToken);
+        String userToken = ServletUtil.getHeaderIgnoreCase(request, UserConstant.TOKEN);
+        // 用户id
+        String userId = ThreadLocalUtils.getUserId();
+        // IP地址
         String ipAddress = ServletUtil.getClientIP(request);
+        // 请求url
         String requestURI = request.getRequestURI();
+        // 请求参数
         String params = this.getParams(request, requestURI);
         // 拿到方法上面的注解 以便拿到其中的内容
         Method method = ((MethodSignature) jp.getSignature()).getMethod();
-        SysLog sysLogAnno = method.getAnnotation(SysLog.class);
-        // 包装日志
-        com.xbh.politemic.biz.log.domain.SysLog sysLog = new com.xbh.politemic.biz.log.domain.SysLog()
-                .setUserId(userId)
-                .setPath(requestURI)
-                .setParams(params)
-                .setModelName(sysLogAnno.modelName())
-                .setBehavior(sysLogAnno.behavior())
-                .setRemark(sysLogAnno.remark())
-                .setIp(ipAddress).setTime(new Timestamp(System.currentTimeMillis()));
+        com.xbh.politemic.common.annotation.SysLog sysLogAnno = method.getAnnotation(com.xbh.politemic.common.annotation.SysLog.class);
+        // 构建日志
+        SysLog sysLog = LogDTO.buildSysLog(userId, requestURI, params, ipAddress,
+
+                sysLogAnno.modelName(), sysLogAnno.behavior(), sysLogAnno.remark());
+
         // 保存
         this.baseSysLogSrv.insertSelective(sysLog);
     }
@@ -82,10 +81,12 @@ public class LogInterceptor {
         Map<String, String> requestParamsMap = ServletUtil.getParamMap(request);
         // public HashMap(Map<? extends K, ? extends V> m)构造方法可能会报空指针
         if (!requestParamsMap.isEmpty()) {
-
+            // 登陆相关接口替换密码
             if (requestURI.endsWith("Login")) {
+
                 requestParamsMap.replace("userPass", this.ARR_REPLACE_PASSWORD);
             }
+
             return JSONObject.toJSONString(requestParamsMap);
         }
         return JSONObject.toJSONString(Collections.emptyMap());

@@ -3,6 +3,7 @@ package com.xbh.politemic.task;
 import com.xbh.politemic.biz.queue.domain.QueueMsg;
 import com.xbh.politemic.biz.queue.srv.BaseQueueSrv;
 import com.xbh.politemic.common.constant.Constants;
+import com.xbh.politemic.common.constant.QueueConstant;
 import com.xbh.politemic.common.imapper.ScheduleTaskMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,14 +56,21 @@ public class DynamicScheduleAnewSendFailureEmail implements SchedulingConfigurer
         taskReg.addTriggerTask(() -> {
             // 设置执行任务流程
             log.info("@@@@@定时任务:推送失败邮件>>>>>>>>>>>>>>>启动");
-            // 状态不是3 且创建时间在一天前的这个时候之后
+            // 状态不是2 且创建时间在一天前的这个时候之后
             Example example = Example.builder(QueueMsg.class).build();
+
             Example.Criteria criteria = example.createCriteria();
+
             criteria.andNotEqualTo(this.STATUS_K, this.STATUS_V)
+
                     .andGreaterThan(this.CREATE_TIME_K, new Timestamp(System.currentTimeMillis() - this.ONE_DAY))
-                    .andEqualTo(Constants.MSG_TYPE_COLUMN_NAME, Constants.MSG_TYPE_EMAIL);
+                    // 队列消息表中消息类型 0-邮件消息 1-获取用户评论尾巴消息 2-帖子审核消息
+                    .andEqualTo(QueueConstant.MSG_TYPE_COLUMN_NAME, Constants.STATUS_STR_ZERO);
+
             List<QueueMsg> list = this.baseQueueSrv.selectByExample(example);
+
             if (list != null && !list.isEmpty()) {
+
                 this.asyncTask.createActivateEmailMsgs(list);
             }
         }, triggerContext -> {

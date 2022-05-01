@@ -3,6 +3,8 @@ package com.xbh.politemic.biz.log.domain;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.Date;
@@ -14,6 +16,7 @@ public class SysLog implements Serializable {
      * 日志id
      */
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     /**

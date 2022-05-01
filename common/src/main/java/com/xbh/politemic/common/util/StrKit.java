@@ -1,8 +1,6 @@
 package com.xbh.politemic.common.util;
 
-import cn.hutool.core.lang.RegexPool;
-import cn.hutool.core.util.ReUtil;
-import com.xbh.politemic.common.constant.Constants;
+import com.xbh.politemic.common.constant.UserConstant;
 import org.springframework.util.DigestUtils;
 
 import java.util.Locale;
@@ -41,7 +39,7 @@ public class StrKit {
      * @date: 2021/10/4 12:20
      */
     public static String getValidateCode() {
-        return getSalt(Constants.VALIDATE_CODE_START_INDEX, Constants.VALIDATE_CODE_END_INDEX).toUpperCase(Locale.ROOT);
+        return getSalt(UserConstant.VALIDATE_CODE_START_INDEX, UserConstant.VALIDATE_CODE_END_INDEX).toUpperCase(Locale.ROOT);
     }
 
     /**
@@ -51,15 +49,6 @@ public class StrKit {
      */
     public static String MD5Code(String str) {
         return DigestUtils.md5DigestAsHex(str.getBytes());
-    }
-
-    /**
-     * @description: 验证邮箱
-     * @author: zhengbohang
-     * @date: 2021/10/4 10:18
-     */
-    public static boolean validEmail(String str) {
-        return ReUtil.isMatch(RegexPool.EMAIL, str);
     }
 
 }

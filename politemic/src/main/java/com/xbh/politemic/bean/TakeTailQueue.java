@@ -5,10 +5,12 @@ import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.rabbitmq.client.Channel;
 import com.xbh.politemic.biz.queue.domain.QueueMsg;
+import com.xbh.politemic.biz.queue.dto.QueueDTO;
 import com.xbh.politemic.biz.queue.srv.BaseQueueSrv;
 import com.xbh.politemic.biz.user.domain.SysUser;
 import com.xbh.politemic.biz.user.srv.BaseUserSrv;
 import com.xbh.politemic.common.constant.Constants;
+import com.xbh.politemic.common.constant.QueueConstant;
 import com.xbh.politemic.common.util.StrKit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -21,7 +23,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,7 +60,7 @@ public class TakeTailQueue {
      * @date: 2021/10/5 15:22
      */
     public void send(String msgContent, String correlationData) {
-        this.tailRabbitTemplate.convertAndSend(Constants.TAIL_EXCHANGE_NAME, "", msgContent, new CorrelationData(correlationData));
+        this.tailRabbitTemplate.convertAndSend(QueueConstant.TAIL_EXCHANGE_NAME, "", msgContent, new CorrelationData(correlationData));
     }
 
     /**
@@ -67,11 +68,11 @@ public class TakeTailQueue {
      * @author: zhengbohang
      * @date: 2021/10/5 17:48
      */
-    @RabbitListener(queues = Constants.TAIL_EXCHANGE_BIND_QUEUE_NAME)
+    @RabbitListener(queues = QueueConstant.TAIL_EXCHANGE_BIND_QUEUE_NAME)
     public void msgConsumer(String message, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long tag) {
         JSONObject msg = JSONObject.parseObject(message);
         log.info("@@@@@收到mq的消息: " + msg.toJSONString());
-        String msgId = msg.getString(Constants.MSG_ID_COLUMN_NAME);
+        String msgId = msg.getString(QueueConstant.MSG_ID_COLUMN_NAME);
         String userId = msg.getString(this.USER_ID_KEY);
         String url = msg.getString(this.TAKE_TAIL_URL_KEY);
         // 告知mq 数据已收到
@@ -111,11 +112,10 @@ public class TakeTailQueue {
     void customOverModifyMsgStatus(String msgId, String userId, String tailStr) {
         // 修改对应用户的尾巴
         this.baseUserSrv.updateByPrimaryKeySelective(new SysUser().setId(userId).setTail(tailStr));
+        // 构建一个被消费状态的消息
+        QueueMsg queueMsg = QueueDTO.buildConsumedMsg(msgId);
         // 修改尾巴消息 中id为 ** 的消息
-        this.baseQueueSrv.updateByPrimaryKeySelective(new QueueMsg()
-                .setId(msgId)
-                .setStatus(Constants.MSG_CONSUMED_STATUS)
-                .setConsumTime(new Timestamp(System.currentTimeMillis())));
+        this.baseQueueSrv.updateByPrimaryKeySelective(queueMsg);
     }
 
     /**
@@ -126,21 +126,16 @@ public class TakeTailQueue {
     @Transactional(rollbackFor = Exception.class)
     public void createTakeTailMsg(String userId, String takeTailUrl) {
         // 将用户数据放入消息中 供后续处理
-        Map<String, String> map = new HashMap<>(3);
+        Map<String, String> map = new HashMap<>(5);
         String msgId = StrKit.getUUID();
 
-        map.put(Constants.MSG_ID_COLUMN_NAME, msgId);
+        map.put(QueueConstant.MSG_ID_COLUMN_NAME, msgId);
         map.put(this.USER_ID_KEY, userId);
         map.put(this.TAKE_TAIL_URL_KEY, takeTailUrl);
         String content = JSONObject.toJSONString(map);
-        // 初始化激活邮件保存进数据库
-        QueueMsg queueMsg = new QueueMsg()
-                            .setId(msgId)
-                            .setUserId(userId)
-                            .setMsgContent(content)
-                            .setStatus(Constants.MSG_INITIAL_STATUS)
-                            .setType(Constants.MSG_TYPE_TAIL);
-        // 推送队列前持久化
+        // 初始化激活邮件 --type->消息类型 0-邮件消息 1-获取用户评论尾巴消息 2-帖子审核消息
+        QueueMsg queueMsg = QueueDTO.buildInitMsg(msgId, userId, content, Constants.STATUS_STR_ONE);
+        // 推送队列前持久化 保存进数据库
         this.baseQueueSrv.insertSelective(queueMsg);
         // 推入队列
         this.send(content, msgId);

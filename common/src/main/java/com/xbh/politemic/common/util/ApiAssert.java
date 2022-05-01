@@ -34,7 +34,13 @@ public class ApiAssert {
 
     public static void hasBlank(@Nullable String text, String message) {
         if (!StrUtil.hasBlank(text)) {
-            throw new IllegalArgumentException(message);
+            throw new ApiException(ResultEnum.PARAMS_NONE_PASS.getCode(), message);
+        }
+    }
+
+    public static void noneBlank(@Nullable String text, String message) {
+        if (StrUtil.hasBlank(text)) {
+            throw new ApiException(ResultEnum.PARAMS_NONE_PASS.getCode(), message);
         }
     }
 }

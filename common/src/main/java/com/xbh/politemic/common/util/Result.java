@@ -14,6 +14,8 @@ import java.io.Serializable;
 @Getter
 public class Result implements Serializable {
 
+    private static final long serialVersionUID = -6166789405232241629L;
+
     private Integer code;
     private String msg;
     private Object bean;

@@ -6,21 +6,27 @@ import lombok.experimental.Accessors;
 import java.io.Serializable;
 
 /**
- * @UserLoginRequestVO: 用户登录请求VO
+ * @UserRegisterRequestVO: 用户注册请求 VO
  * @author: ZBoHang
- * @time: 2021/12/9 17:46
+ * @time: 2021/12/10 9:59
  */
 @Data
 @Accessors(chain = true)
-public class UserLoginRequestVO implements Serializable {
+public class UserRegisterRequestVO implements Serializable {
 
-    private static final long serialVersionUID = 2814197222782482702L;
+    private static final long serialVersionUID = -3843080726244593241L;
     /*
      * 用户名
      */
     private String userName;
+
     /*
      * 密码
      */
     private String userPass;
+
+    /*
+     * 绑定邮箱
+     */
+    private String email;
 }

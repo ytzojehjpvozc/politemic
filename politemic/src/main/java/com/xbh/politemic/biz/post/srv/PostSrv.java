@@ -51,7 +51,8 @@ public class PostSrv {
         discussPosts.setId(postId)
                           .setUserId(ThreadLocalUtils.getUserId())
                           .setCreateTime(new Timestamp(System.currentTimeMillis()))
-                          .setStatus(Constants.CREATE_POST_INIT_STATUS)
+                          // 新建帖子初始状态  1-发表后待审核  2-正常  3-精华帖  4-管理删除、审核未通过的拉黑帖
+                          .setStatus(Constants.STATUS_STR_ONE)
                           .setType(this.CREATE_POST_INIT_TYPE);
         // 持久化帖子
         this.basePostSrv.insertSelective(discussPosts);
