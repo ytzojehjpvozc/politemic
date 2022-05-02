@@ -30,7 +30,7 @@ public class UserConstant {
     /**
      * Redis中的token的有效时间(ps:3天) 单位: s
      */
-    public static final long TOKEN_TIME_OUT_IN_REDIS = 60 * 24;
+    public static final long TOKEN_TIME_OUT_IN_REDIS = 60 * 60 * 24;
 
     /**
      * 储存在redis中用户token的前缀

@@ -20,6 +20,12 @@ public class ApiAssert {
         }
     }
 
+    public static void isFalse(boolean expression, String message) {
+        if (expression) {
+            throw new ApiException(ResultEnum.PARAMS_NONE_PASS.getCode(), message);
+        }
+    }
+
     public static void isNull(@Nullable Object object, String message) {
         if (object != null) {
             throw new ApiException(ResultEnum.PARAMS_NONE_PASS.getCode(), message);

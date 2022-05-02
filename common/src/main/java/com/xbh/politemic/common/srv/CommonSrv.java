@@ -81,8 +81,8 @@ public abstract class CommonSrv<T> {
      * @time: 2021/12/9 15:32
      */
     @Transactional(rollbackFor = Exception.class)
-    public int insertSelective(T t) {
-        return this.commonMapper.insertSelective(t);
+    public void insertSelective(T t) {
+        this.commonMapper.insertSelective(t);
     }
 
     /**
@@ -104,8 +104,8 @@ public abstract class CommonSrv<T> {
      * @time: 2021/12/9 16:10
      */
     @Transactional(rollbackFor = Exception.class)
-    public int updateByPrimaryKey(T t) {
-        return this.commonMapper.updateByPrimaryKey(t);
+    public void updateByPrimaryKey(T t) {
+        this.commonMapper.updateByPrimaryKey(t);
     }
 
     /**
@@ -114,8 +114,8 @@ public abstract class CommonSrv<T> {
      * @time: 2021/12/9 15:27
      */
     @Transactional(rollbackFor = Exception.class)
-    public int updateByPrimaryKeySelective(T t) {
-        return this.commonMapper.updateByPrimaryKeySelective(t);
+    public void updateByPrimaryKeySelective(T t) {
+        this.commonMapper.updateByPrimaryKeySelective(t);
     }
 
     //********************* 删 除 **************************

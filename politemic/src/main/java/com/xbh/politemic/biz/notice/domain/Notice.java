@@ -17,7 +17,7 @@ public class Notice implements Serializable {
     private Integer id;
 
     /**
-     * 通知方
+     * 通知方 不填为系统通知 有值则为私信(对应用户id)
      */
     private String fromId;
 

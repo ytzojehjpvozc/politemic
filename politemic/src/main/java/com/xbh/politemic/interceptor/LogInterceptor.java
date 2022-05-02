@@ -2,8 +2,8 @@ package com.xbh.politemic.interceptor;
 
 import cn.hutool.extra.servlet.ServletUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.xbh.politemic.biz.log.builder.LogBuilder;
 import com.xbh.politemic.biz.log.domain.SysLog;
-import com.xbh.politemic.biz.log.dto.LogDTO;
 import com.xbh.politemic.biz.log.srv.BaseSysLogSrv;
 import com.xbh.politemic.common.constant.UserConstant;
 import com.xbh.politemic.common.util.ThreadLocalUtils;
@@ -62,7 +62,7 @@ public class LogInterceptor {
         Method method = ((MethodSignature) jp.getSignature()).getMethod();
         com.xbh.politemic.common.annotation.SysLog sysLogAnno = method.getAnnotation(com.xbh.politemic.common.annotation.SysLog.class);
         // 构建日志
-        SysLog sysLog = LogDTO.buildSysLog(userId, requestURI, params, ipAddress,
+        SysLog sysLog = LogBuilder.buildSysLog(userId, requestURI, params, ipAddress,
 
                 sysLogAnno.modelName(), sysLogAnno.behavior(), sysLogAnno.remark());
 

@@ -77,5 +77,13 @@ public class AsyncTask {
         this.auditPostQueue.createAuditPostMsg(discussPosts);
     }
 
-
+    /**
+     * 帖子异步审核，循环审核多个
+     * @author: ZBoHang
+     * @time: 2021/10/15 15:20
+     */
+    @Async("CustomAsyncThreadPoolExecutor")
+    public void auditPosts(List<QueueMsg> list) {
+        list.forEach(queueMsg -> this.auditPostQueue.send(queueMsg.getMsgContent(), queueMsg.getMsgCorrelationData()));
+    }
 }

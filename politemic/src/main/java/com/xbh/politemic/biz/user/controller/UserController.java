@@ -5,7 +5,7 @@ import com.xbh.politemic.biz.user.vo.UserLoginRequestVO;
 import com.xbh.politemic.biz.user.vo.UserRegisterRequestVO;
 import com.xbh.politemic.common.annotation.NoneNeedLogin;
 import com.xbh.politemic.common.annotation.SysLog;
-import com.xbh.politemic.common.constant.Constants;
+import com.xbh.politemic.common.constant.CommonConstants;
 import com.xbh.politemic.common.util.ApiAssert;
 import com.xbh.politemic.common.util.Result;
 import io.swagger.annotations.Api;
@@ -30,11 +30,10 @@ public class UserController {
     @Autowired
     private UserSrv userSrv;
 
-    @NoneNeedLogin
     @ApiImplicitParam(name = "test",value = "测试参数",required = true)
     @ApiOperation(value = "测试接口")
     @PostMapping("test")
-    @SysLog(modelName = Constants.USER_MODEL_NAME, behavior = "用于测试", remark = "remark")
+    @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "用于测试", remark = "remark")
     public Result test(@RequestParam(name = "test") String test) throws Exception {
         if ("1".equals(test)) {
             throw new RuntimeException("123");
@@ -46,7 +45,7 @@ public class UserController {
     @NoneNeedLogin
     @ApiOperation(value = "用户登录接口")
     @PostMapping("userLogin")
-    @SysLog(modelName = Constants.USER_MODEL_NAME, behavior = "用户登录", remark = "日志中密码替换")
+    @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "用户登录", remark = "日志中密码替换")
     public Result userLogin(UserLoginRequestVO vo) {
 
         ApiAssert.notNull(vo, "请求参数不能为空!");
@@ -61,7 +60,7 @@ public class UserController {
     @NoneNeedLogin
     @ApiOperation(value = "用户注册接口")
     @PostMapping("userRegister")
-    @SysLog(modelName = Constants.USER_MODEL_NAME, behavior = "用户注册", remark = "只允许普通用户进行注册")
+    @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "用户注册", remark = "只允许普通用户进行注册")
     public Result userRegister(@RequestBody(required = false) UserRegisterRequestVO vo) {
 
         ApiAssert.notNull(vo, "请求参数不能为空");
@@ -82,7 +81,7 @@ public class UserController {
             @ApiImplicitParam(name = "activateCode", value = "激活码", paramType = "path")
     })
     @GetMapping("userActivate/{id}/{activateCode}")
-    @SysLog(modelName = Constants.USER_MODEL_NAME, behavior = "激活账户", remark = "普通用户激活")
+    @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "激活账户", remark = "普通用户激活")
     public Result userActivate(@PathVariable(name = "id", required = false) String id,
                                @PathVariable(name = "activateCode", required = false) String activateCode) {
 

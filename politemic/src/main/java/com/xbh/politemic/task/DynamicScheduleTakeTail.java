@@ -2,8 +2,9 @@ package com.xbh.politemic.task;
 
 import com.xbh.politemic.biz.queue.domain.QueueMsg;
 import com.xbh.politemic.biz.queue.srv.BaseQueueSrv;
-import com.xbh.politemic.common.constant.Constants;
 import com.xbh.politemic.common.constant.QueueConstant;
+import com.xbh.politemic.common.enums.queue.QueueMsgStatusEnum;
+import com.xbh.politemic.common.enums.queue.QueueMsgTypeEnum;
 import com.xbh.politemic.common.imapper.ScheduleTaskMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,13 +36,6 @@ public class DynamicScheduleTakeTail implements SchedulingConfigurer {
      * 定时获取尾巴任务配置的配置名
      */
     private final String TAKE_TAIL_SCHEDULE_TASK_CONFIG_NAME = "schedule_task_take_tail";
-    /**
-     * 失败邮件筛选条件的字段
-     */
-    private final String STATUS_K = "status";
-    private final String STATUS_V = "2";
-    private final String CREATE_TIME_K = "productTime";
-    private final long ONE_DAY = 1000 * 60 * 60 * 24;
 
     @Autowired
     private Environment environment;
@@ -62,11 +56,11 @@ public class DynamicScheduleTakeTail implements SchedulingConfigurer {
 
             Example.Criteria criteria = example.createCriteria();
             // 队列消息表中消息类型 0-邮件消息 1-获取用户评论尾巴消息 2-帖子审核消息
-            criteria.andEqualTo(QueueConstant.MSG_TYPE_COLUMN_NAME, Constants.STATUS_STR_ONE)
+            criteria.andEqualTo(QueueConstant.MSG_TYPE_COLUMN_NAME, QueueMsgTypeEnum.MSG_TAKE_TAIL.getCode())
 
-                    .andNotEqualTo(this.STATUS_K, this.STATUS_V)
+                    .andNotEqualTo(QueueConstant.MSG_STATUS_COLUMN_NAME, QueueMsgStatusEnum.MSG_CONSUMED.getCode())
 
-                    .andGreaterThan(this.CREATE_TIME_K, new Timestamp(System.currentTimeMillis() - this.ONE_DAY));
+                    .andGreaterThan(QueueConstant.MSG_CREATE_TIME_COLUMN_NAME, new Timestamp(System.currentTimeMillis() - QueueConstant.ONE_DAY));
             // 查找
             List<QueueMsg> list = this.baseQueueSrv.selectByExample(example);
             // 如果错误消息

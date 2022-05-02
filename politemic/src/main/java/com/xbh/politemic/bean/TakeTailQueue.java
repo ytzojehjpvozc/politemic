@@ -4,13 +4,13 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.rabbitmq.client.Channel;
+import com.xbh.politemic.biz.queue.builder.QueueBuilder;
 import com.xbh.politemic.biz.queue.domain.QueueMsg;
-import com.xbh.politemic.biz.queue.dto.QueueDTO;
 import com.xbh.politemic.biz.queue.srv.BaseQueueSrv;
 import com.xbh.politemic.biz.user.domain.SysUser;
 import com.xbh.politemic.biz.user.srv.BaseUserSrv;
-import com.xbh.politemic.common.constant.Constants;
 import com.xbh.politemic.common.constant.QueueConstant;
+import com.xbh.politemic.common.enums.queue.QueueMsgTypeEnum;
 import com.xbh.politemic.common.util.StrKit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -113,7 +113,7 @@ public class TakeTailQueue {
         // 修改对应用户的尾巴
         this.baseUserSrv.updateByPrimaryKeySelective(new SysUser().setId(userId).setTail(tailStr));
         // 构建一个被消费状态的消息
-        QueueMsg queueMsg = QueueDTO.buildConsumedMsg(msgId);
+        QueueMsg queueMsg = QueueBuilder.buildConsumedMsg(msgId);
         // 修改尾巴消息 中id为 ** 的消息
         this.baseQueueSrv.updateByPrimaryKeySelective(queueMsg);
     }
@@ -134,7 +134,7 @@ public class TakeTailQueue {
         map.put(this.TAKE_TAIL_URL_KEY, takeTailUrl);
         String content = JSONObject.toJSONString(map);
         // 初始化激活邮件 --type->消息类型 0-邮件消息 1-获取用户评论尾巴消息 2-帖子审核消息
-        QueueMsg queueMsg = QueueDTO.buildInitMsg(msgId, userId, content, Constants.STATUS_STR_ONE);
+        QueueMsg queueMsg = QueueBuilder.buildInitMsg(msgId, userId, content, QueueMsgTypeEnum.MSG_TAKE_TAIL.getCode());
         // 推送队列前持久化 保存进数据库
         this.baseQueueSrv.insertSelective(queueMsg);
         // 推入队列

@@ -1,7 +1,7 @@
 package com.xbh.politemic.config;
 
+import com.xbh.politemic.biz.queue.builder.QueueBuilder;
 import com.xbh.politemic.biz.queue.domain.QueueMsg;
-import com.xbh.politemic.biz.queue.dto.QueueDTO;
 import com.xbh.politemic.biz.queue.srv.BaseQueueSrv;
 import com.xbh.politemic.common.constant.QueueConstant;
 import lombok.extern.slf4j.Slf4j;
@@ -106,7 +106,7 @@ public class AmqpConfig {
             }
             log.info("@@@@@消息回调,消息发送成功");
             // 构建一个入队状态消息
-            QueueMsg queueMsg = QueueDTO.buildOnQueueMsg(msgId);
+            QueueMsg queueMsg = QueueBuilder.buildOnQueueMsg(msgId);
             // 修改队列消息表中的消息状态
             this.baseQueueSrv.updateByPrimaryKeySelective(queueMsg);
         };

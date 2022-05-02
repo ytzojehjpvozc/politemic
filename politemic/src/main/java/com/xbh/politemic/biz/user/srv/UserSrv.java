@@ -5,13 +5,13 @@ import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.xbh.politemic.bean.RedisClient;
+import com.xbh.politemic.biz.user.builder.UserBuilder;
 import com.xbh.politemic.biz.user.domain.SysUser;
 import com.xbh.politemic.biz.user.domain.UserToken;
-import com.xbh.politemic.biz.user.dto.UserDTO;
 import com.xbh.politemic.biz.user.vo.UserLoginRequestVO;
 import com.xbh.politemic.biz.user.vo.UserRegisterRequestVO;
-import com.xbh.politemic.common.constant.Constants;
 import com.xbh.politemic.common.constant.UserConstant;
+import com.xbh.politemic.common.enums.user.UserStatusEnum;
 import com.xbh.politemic.common.util.ServiceAssert;
 import com.xbh.politemic.common.util.StrKit;
 import com.xbh.politemic.task.AsyncTask;
@@ -87,7 +87,7 @@ public class UserSrv {
         ServiceAssert.isTrue(StrUtil.equals(user.getUserPass(), encryptPass), "用户名或者密码错误!");
         // TODO: 2021/10/9 登录失败 次数校验
         // 用户状态 0:未激活 1:已激活
-        ServiceAssert.isFalse(StrUtil.equals(Constants.STATUS_STR_ZERO, user.getStatus()), "用户处于未激活状态!");
+        ServiceAssert.isFalse(StrUtil.equals(UserStatusEnum.INACTIVATED.getCode(), user.getStatus()), "用户处于未激活状态!");
         // 生成一个登录令牌
         String token = StrKit.getUUID();
         // 从数据库中查找是否登录过
@@ -95,7 +95,7 @@ public class UserSrv {
         // 判断该修改还是新增token
         String addOrModify = userToken != null ? this.TOKEN_MODIFY : this.TOKEN_ADD;
         // 构建新的token
-        userToken = UserDTO.buildNewToken(user.getId(), token);
+        userToken = UserBuilder.buildNewToken(user.getId(), token);
         // 保存令牌 和 用户信息
         this.saveUserToken(userToken, addOrModify, user);
         // 返回map initialCapacity = 数量 / 负载因子 + 1
@@ -122,7 +122,7 @@ public class UserSrv {
         // 校验用户名和邮箱是否已经注册
         ServiceAssert.isFalse(this.checkEmailOrUserNameInDB(vo.getUserName(), vo.getEmail()), "用户名或邮箱重复!");
         // TODO: 2021/10/9 长度、是否汉字等相关校验
-        SysUser sysUser = UserDTO.buildNewSysUser(vo);
+        SysUser sysUser = UserBuilder.buildNewSysUser(vo);
         // 持久化
         this.baseUserSrv.insert(sysUser);
         // 异步交给队列发送邮件
@@ -145,11 +145,10 @@ public class UserSrv {
         String validCode = this.baseUserSrv.selectByPrimaryKey(id).getActivationCode();
 
         ServiceAssert.isTrue(activateCode.equals(validCode), "验证码错误,请输入正确的验证码!");
+        // 构建一个已激活状态的用户
+        SysUser sysUser = UserBuilder.buildActivatedUser(id);
         // 若一致 修改用户状态
-        this.baseUserSrv.updateByPrimaryKeySelective(new SysUser()
-                .setId(id)
-                // 用户状态 0:未激活 1:已激活
-                .setStatus(Constants.STATUS_STR_ONE));
+        this.baseUserSrv.updateByPrimaryKeySelective(sysUser);
 
         return "激活成功!";
     }

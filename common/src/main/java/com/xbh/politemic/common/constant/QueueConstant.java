@@ -46,4 +46,19 @@ public class QueueConstant {
      * 队列消息表中消息类型的字段
      */
     public static final String MSG_TYPE_COLUMN_NAME = "type";
+
+    /**
+     * 队列消息表中消息状态的字段
+     */
+    public static final String MSG_STATUS_COLUMN_NAME = "status";
+
+    /**
+     * 队列消息表中消息创建时间的字段
+     */
+    public static final String MSG_CREATE_TIME_COLUMN_NAME = "productTime";
+
+    /**
+     * 一天时间对应的毫秒数
+     */
+    public static final long ONE_DAY = 1000 * 60 * 60 * 24;
 }

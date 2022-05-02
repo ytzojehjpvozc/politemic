@@ -1,9 +1,10 @@
 package com.xbh.politemic.handler;
 
 import cn.hutool.core.util.StrUtil;
+import com.xbh.politemic.biz.log.builder.LogBuilder;
 import com.xbh.politemic.biz.log.domain.ExceptionLog;
-import com.xbh.politemic.biz.log.dto.LogDTO;
 import com.xbh.politemic.biz.log.srv.BaseExceptionLogSrv;
+import com.xbh.politemic.common.constant.CommonConstants;
 import com.xbh.politemic.common.exception.ApiException;
 import com.xbh.politemic.common.exception.ServiceException;
 import com.xbh.politemic.common.util.Result;
@@ -23,11 +24,6 @@ import java.text.MessageFormat;
 @RestControllerAdvice
 public class ExceptionsHandler {
 
-    /**
-     * 异常处理 统一返回消息
-     */
-    private final String EXCEPTIONS_HANDLER = "请求发生错误,异常序号: {} ,请联系管理员处理";
-
     @Autowired
     private BaseExceptionLogSrv baseExceptionLogSrv;
 
@@ -46,11 +42,11 @@ public class ExceptionsHandler {
         // 获取堆栈信息
         String trace = this.getTrace(ex);
         // 构建一个异常日志
-        ExceptionLog exceptionLog = LogDTO.buildExceptionLog(trace);
+        ExceptionLog exceptionLog = LogBuilder.buildExceptionLog(trace);
         // 持久化
-        Integer id = this.baseExceptionLogSrv.insertUseGeneratedKeys(exceptionLog);
+        this.baseExceptionLogSrv.insertUseGeneratedKeys(exceptionLog);
         // 返回给客户端错误id
-        return Result.failure(StrUtil.format(this.EXCEPTIONS_HANDLER, id));
+        return Result.failure(StrUtil.format(CommonConstants.EXCEPTIONS_REPORT, exceptionLog.getId()));
     }
 
     /**

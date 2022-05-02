@@ -2,6 +2,7 @@ package com.xbh.politemic.interceptor;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.xbh.politemic.bean.RedisClient;
 import com.xbh.politemic.biz.user.domain.UserToken;
 import com.xbh.politemic.biz.user.srv.BaseUserTokenSrv;
@@ -62,7 +63,9 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
                 if (redisClient.hasKey(realTokenKey)) {
                     // 存在则比对token的值,相等则放行
-                    String userId = redisClient.get(realTokenKey);
+                    String userJsonStr = redisClient.get(realTokenKey);
+                    // 转换为json对象 并取得userId
+                    String userId = JSONObject.parseObject(userJsonStr).getString("id");
                     // 设置日志标志
                     this.setMDC(userId);
                     // 设置用户id至本地线程副本中
