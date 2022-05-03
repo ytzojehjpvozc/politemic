@@ -121,11 +121,10 @@ public class AuditPostQueue {
             //  1-发表后待审核  2-正常  3-精华帖  4-管理删除、审核未通过的拉黑帖
             this.customOverModifyMsgStatus(msgId, postId, PostStatusEnum.NORMAL.getCode(), notice);
         }
-        // TODO: 2021/10/20 通知用户帖子已审核
     }
 
     /**
-     * 消息消费完成修改消息状态
+     * 消息消费完成修改消息状态 并添加用户通知
      * @author: ZBoHang
      * @time: 2021/10/15 16:21
      */

@@ -15,11 +15,11 @@ import java.io.Serializable;
 public class UserLoginRequestVO implements Serializable {
 
     private static final long serialVersionUID = 2814197222782482702L;
-    /*
+    /**
      * 用户名
      */
     private String userName;
-    /*
+    /**
      * 密码
      */
     private String userPass;
