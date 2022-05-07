@@ -1,14 +1,21 @@
 package com.xbh.politemic.biz.notice.srv;
 
 import cn.hutool.core.util.StrUtil;
+import com.xbh.politemic.biz.log.domain.SysLog;
+import com.xbh.politemic.biz.log.srv.BaseSysLogSrv;
 import com.xbh.politemic.biz.notice.domain.Notice;
+import com.xbh.politemic.biz.notice.vo.PageNoticeRequestVO;
 import com.xbh.politemic.biz.user.srv.BaseUserSrv;
 import com.xbh.politemic.biz.user.vo.GetNoticeDetailResponseVO;
 import com.xbh.politemic.common.enums.notice.NoticeStatusEnum;
+import com.xbh.politemic.common.util.PageUtil;
 import com.xbh.politemic.common.util.ServiceAssert;
+import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
+
+import java.util.List;
 
 /**
  * @NoticeSrv: 通知 srv
@@ -20,6 +27,8 @@ public class NoticeSrv extends BaseNoticeSrv {
 
     @Autowired
     private BaseUserSrv baseUserSrv;
+    @Autowired
+    private BaseSysLogSrv baseSysLogSrv;
 
     /**
      * 获取指定用户未读通知个数 通过用户id
@@ -72,4 +81,22 @@ public class NoticeSrv extends BaseNoticeSrv {
     }
 
 
+    public PageUtil<SysLog> pageNotice(PageNoticeRequestVO vo) {
+        // 当前页数
+        Integer pageNum = vo.getCurrentPageNum();
+        // 每页数据大小
+        Integer pageSize = vo.getCurrentPageSize();
+
+        Example example = Example.builder(SysLog.class).build();
+
+        Example.Criteria criteria = example.createCriteria();
+
+        criteria.andLessThanOrEqualTo("id", 8);
+
+        Integer count = this.baseSysLogSrv.selectCountByExample(example);
+
+        List<SysLog> list = this.baseSysLogSrv.selectByRowBounds(example, new RowBounds((pageNum - 1) * pageSize, pageSize));
+
+        return new PageUtil<SysLog>(pageNum, pageSize, count.longValue(), list);
+    }
 }

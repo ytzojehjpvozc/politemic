@@ -1,6 +1,8 @@
 package com.xbh.politemic.biz.post.controller;
 
 import com.xbh.politemic.biz.post.srv.PostSrv;
+import com.xbh.politemic.common.annotation.SysLog;
+import com.xbh.politemic.common.constant.CommonConstants;
 import com.xbh.politemic.common.util.ApiAssert;
 import com.xbh.politemic.common.util.Result;
 import com.xbh.politemic.common.util.ThreadLocalUtils;
@@ -26,6 +28,7 @@ public class PostsController {
 
     @ApiOperation(value = "发布帖子接口")
     @PostMapping("publishPosts")
+    @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "发布帖子", remark = "发布完事审核,结果会以系统通知方式传递给用户")
     public Result publishPosts(String title, String content) {
 
         ApiAssert.noneBlank(title, "帖子主题不能为空!");

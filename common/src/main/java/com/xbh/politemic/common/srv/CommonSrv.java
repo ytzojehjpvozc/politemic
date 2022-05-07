@@ -1,6 +1,7 @@
 package com.xbh.politemic.common.srv;
 
 import com.xbh.politemic.common.imapper.CommonMapper;
+import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +53,17 @@ public abstract class CommonSrv<T> {
      */
     public int selectCountByExample(Object example) {
         return this.commonMapper.selectCountByExample(example);
+    }
+
+    /**
+     * 分页查询
+     * @param example: 条件
+     * @param rowBounds: 分页对象
+     * @author: zhengbohang
+     * @date: 2021/12/13 21:26
+     */
+    public List<T> selectByRowBounds(Object example, RowBounds rowBounds) {
+         return this.commonMapper.selectByExampleAndRowBounds(example, rowBounds);
     }
 
     /**
