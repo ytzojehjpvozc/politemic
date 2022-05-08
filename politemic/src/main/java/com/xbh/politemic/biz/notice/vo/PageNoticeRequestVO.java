@@ -26,6 +26,9 @@ public class PageNoticeRequestVO extends PageUtil<Notice> implements Serializabl
      */
     private String status;
 
-
+    /**
+     * 通知/私信 类型 notice-通知 letter-私信
+     */
+    private String type;
 
 }

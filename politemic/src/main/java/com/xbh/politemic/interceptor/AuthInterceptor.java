@@ -1,19 +1,16 @@
 package com.xbh.politemic.interceptor;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.servlet.ServletUtil;
-import com.alibaba.fastjson.JSONObject;
-import com.xbh.politemic.bean.RedisClient;
-import com.xbh.politemic.biz.user.domain.UserToken;
-import com.xbh.politemic.biz.user.srv.BaseUserTokenSrv;
+import com.xbh.politemic.biz.user.domain.SysUser;
+import com.xbh.politemic.biz.user.srv.UserSrv;
 import com.xbh.politemic.common.annotation.NoneNeedLogin;
-import com.xbh.politemic.common.constant.UserConstant;
+import com.xbh.politemic.common.constant.CommonConstants;
+import com.xbh.politemic.common.util.HttpServletUtil;
 import com.xbh.politemic.common.util.Result;
-import com.xbh.politemic.common.util.ThreadLocalUtils;
+import com.xbh.politemic.common.util.ThreadLocalUtil;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -21,9 +18,6 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.sql.Date;
 
 /**
  * @AuthInterceptor: 系统权限拦截
@@ -35,11 +29,8 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(AuthInterceptor.class);
 
-    private static final String MDC_KEY = "USER_ID";
     @Autowired
-    private RedisClient redisClient;
-    @Autowired
-    private BaseUserTokenSrv baseUserTokenSrv;
+    private UserSrv userSrv;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -50,48 +41,27 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
             if (noneNeedLogin == null) {
                 // 拿到请求中的令牌
-                String token = ServletUtil.getHeaderIgnoreCase(request, UserConstant.TOKEN);
+                String token = HttpServletUtil.getUserToken(request);
                 // 无令牌 拦截请求 返回权限异常
                 if (StrUtil.isBlank(token)) {
 
-                    this.responseMsg(response, Result.noneAuth().toJsonString());
-
+                    HttpServletUtil.responseMsg(response, Result.noneAuth().toJsonString());
+                    // 拦截
                     return Boolean.FALSE;
                 }
-                // 查询redis中是否存在
-                String realTokenKey = UserConstant.USER_TOKEN_PRE + token;
-
-                if (redisClient.hasKey(realTokenKey)) {
-                    // 存在则比对token的值,相等则放行
-                    String userJsonStr = redisClient.get(realTokenKey);
-                    // 转换为json对象 并取得userId
-                    String userId = JSONObject.parseObject(userJsonStr).getString("id");
-                    // 设置日志标志
-                    this.setMDC(userId);
-                    // 设置用户id至本地线程副本中
-                    ThreadLocalUtils.setUserId(userId);
-
-                    return Boolean.TRUE;
-
-                } else {
-
-                    UserToken userToken = this.baseUserTokenSrv.selectOne(new UserToken().setToken(token));
-                    // 数据库中能查到且到期时间在当前时间之后 则放行
-                    if (userToken != null && userToken.getExpire().after(new Date(System.currentTimeMillis()))) {
-                        // 设置日志标志
-                        this.setMDC(userToken.getUserId());
-                        // 设置用户id至本地线程副本中
-                        ThreadLocalUtils.setUserId(userToken.getUserId());
-
-                        return Boolean.TRUE;
-                    }
-                }
-                // 不存在则拦截 让用户去登录
-                this.responseMsg(response, Result.noneAuth().toJsonString());
-
-                return Boolean.FALSE;
+                // 获取用户信息
+                SysUser sysUser = this.userSrv.getUserInfoByToken(token);
+                // 获取用户id
+                String userId = sysUser.getId();
+                // 设置日志标志 存用户令牌
+                this.setMDC(userId);
+                // 设置用户id至本地线程副本中
+                ThreadLocalUtil.setUserId(userId);
+                // 设置用户令牌至本地线程副本中
+                ThreadLocalUtil.setToken(token);
             }
         }
+        // 放行
         return Boolean.TRUE;
         // return super.preHandle(request, response, handler);
     }
@@ -100,29 +70,8 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
         // MDC、ThreadLocal等在此销毁,清除释放资源
         MDC.clear();
-        ThreadLocalUtils.remove();
+        ThreadLocalUtil.removeAll();
         // super.postHandle(request, response, handler, modelAndView);
-    }
-
-    /**
-     * 响应json数据
-     * @author: ZBoHang
-     * @time: 2021/10/12 9:56
-     */
-    private void responseMsg(HttpServletResponse response, String result) {
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
-        PrintWriter writer = null;
-        try {
-            writer = response.getWriter();
-            writer.print(result);
-        } catch (IOException e) {
-            log.error("@@@@@拦截器向前端响应数据异常");
-        } finally {
-            if (writer != null) {
-                writer.close();
-            }
-        }
     }
 
     /**
@@ -131,6 +80,6 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
      * @time: 2021/10/12 10:02
      */
     private void setMDC(String userId) {
-        MDC.put(MDC_KEY, userId);
+        MDC.put(CommonConstants.MDC_KEY, userId);
     }
 }

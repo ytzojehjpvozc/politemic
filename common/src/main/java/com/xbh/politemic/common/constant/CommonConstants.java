@@ -32,4 +32,19 @@ public class CommonConstants {
      */
     public static final String EXCEPTIONS_REPORT = "请求发生错误,异常编号: {} ,请联系管理员处理";
 
+    /**
+     * 日志埋点key
+     */
+    public static final String MDC_KEY = "USER_ID";
+
+    /**
+     * APPLICATION_JSON
+     */
+    public static final String APPLICATION_JSON_CONTENT_TYPE = "application/json;charset=UTF-8";
+
+    /**
+     * CHARACTER_ENCODING
+     */
+    public static final String CHARACTER_ENCODING_CONTENT_TYPE = "UTF-8";
+
 }

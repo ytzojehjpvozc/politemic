@@ -2,6 +2,7 @@ package com.xbh.politemic.bean;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.rabbitmq.client.Channel;
 import com.xbh.politemic.biz.queue.builder.QueueBuilder;
@@ -98,8 +99,10 @@ public class TakeTailQueue {
             return;
         }
         if (StrUtil.isNotBlank(tailStr)) {
+            // 获取古诗文正文
+            String content = JSONUtil.parseObj(tailStr).getStr("content");
             // 修改队列消息表中的消息状态
-            this.customOverModifyMsgStatus(msgId, userId, tailStr);
+            this.customOverModifyMsgStatus(msgId, userId, content);
         }
     }
 

@@ -8,6 +8,7 @@ import com.xbh.politemic.common.annotation.SysLog;
 import com.xbh.politemic.common.constant.CommonConstants;
 import com.xbh.politemic.common.util.ApiAssert;
 import com.xbh.politemic.common.util.Result;
+import com.xbh.politemic.common.util.ThreadLocalUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -90,6 +91,18 @@ public class UserController {
         ApiAssert.noneBlank(activateCode, "请求参数activateCode异常");
 
         return Result.success(this.userSrv.activate(id,activateCode));
+    }
+
+    @ApiOperation(value = "获取用户信息接口")
+    @GetMapping("getUserInfo")
+    @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "获取用户信息", remark = "需要token")
+    public Result getUserInfo() {
+
+        String token = ThreadLocalUtil.getToken();
+
+        ApiAssert.noneBlank(token, "未登录不能获取用户信息!");
+
+        return Result.success(this.userSrv.getUserInfo(token));
     }
 
 }

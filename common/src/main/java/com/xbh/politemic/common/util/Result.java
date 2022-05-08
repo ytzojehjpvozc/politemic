@@ -1,6 +1,6 @@
 package com.xbh.politemic.common.util;
 
-import com.alibaba.fastjson.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.xbh.politemic.common.enums.ResultEnum;
 import lombok.Getter;
 
@@ -74,6 +74,6 @@ public class Result implements Serializable {
     }
 
     public String toJsonString() {
-        return JSONObject.toJSONString(this);
+        return JSONUtil.toJsonStr(this);
     }
 }

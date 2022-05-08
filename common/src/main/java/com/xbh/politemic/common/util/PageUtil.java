@@ -46,18 +46,19 @@ public class PageUtil<T> {
         this.currentPageNum = currentPageNum;
         this.currentPageSize = currentPageSize;
         this.totalResultSize = totalResultSize;
-        this.totalPageSize = totalResultSize / currentPageSize;
+        Double num = Math.ceil( totalResultSize.doubleValue() / currentPageSize.doubleValue());
+        this.totalPageSize = num.longValue();
         this.data = data;
     }
 
-    public PageUtil setCurrentPageNum(Integer currentPageNum) {
+    public PageUtil<T> setCurrentPageNum(Integer currentPageNum) {
 
         this.currentPageNum = currentPageNum != null && currentPageNum > 0 ? currentPageNum : 1;
 
         return this;
     }
 
-    public PageUtil setCurrentPageSize(Integer currentPageSize) {
+    public PageUtil<T> setCurrentPageSize(Integer currentPageSize) {
 
         this.currentPageSize = currentPageSize != null && currentPageSize > 0 ? currentPageSize : 10;
 

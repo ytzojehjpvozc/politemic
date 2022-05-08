@@ -57,13 +57,15 @@ public abstract class CommonSrv<T> {
 
     /**
      * 分页查询
-     * @param example: 条件
-     * @param rowBounds: 分页对象
-     * @author: zhengbohang
-     * @date: 2021/12/13 21:26
+     * @param example 条件
+     * @param pageNum 当前页 从1开始
+     * @param pageSize 当前页数据量 大于0
+     * @return: java.util.List<T>
+     * @author: ZBoHang
+     * @time: 2021/12/14 14:00
      */
-    public List<T> selectByRowBounds(Object example, RowBounds rowBounds) {
-         return this.commonMapper.selectByExampleAndRowBounds(example, rowBounds);
+    public List<T> selectByRowBounds(Object example, Integer pageNum, Integer pageSize) {
+         return this.commonMapper.selectByExampleAndRowBounds(example, new RowBounds((pageNum - 1) * pageSize, pageSize));
     }
 
     /**

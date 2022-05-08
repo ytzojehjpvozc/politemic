@@ -5,7 +5,7 @@ import com.xbh.politemic.common.annotation.SysLog;
 import com.xbh.politemic.common.constant.CommonConstants;
 import com.xbh.politemic.common.util.ApiAssert;
 import com.xbh.politemic.common.util.Result;
-import com.xbh.politemic.common.util.ThreadLocalUtils;
+import com.xbh.politemic.common.util.ThreadLocalUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class PostsController {
 
         ApiAssert.noneBlank(content, "帖子内容不能为空!");
 
-        String userId = ThreadLocalUtils.getUserId();
+        String userId = ThreadLocalUtil.getUserId();
 
         ApiAssert.noneBlank(userId, "未登录不能发布帖子!");
 

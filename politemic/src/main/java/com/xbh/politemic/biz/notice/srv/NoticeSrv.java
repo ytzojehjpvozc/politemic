@@ -1,21 +1,25 @@
 package com.xbh.politemic.biz.notice.srv;
 
 import cn.hutool.core.util.StrUtil;
-import com.xbh.politemic.biz.log.domain.SysLog;
 import com.xbh.politemic.biz.log.srv.BaseSysLogSrv;
 import com.xbh.politemic.biz.notice.domain.Notice;
 import com.xbh.politemic.biz.notice.vo.PageNoticeRequestVO;
+import com.xbh.politemic.biz.notice.vo.PageNoticeResponseVO;
 import com.xbh.politemic.biz.user.srv.BaseUserSrv;
+import com.xbh.politemic.biz.user.srv.UserSrv;
 import com.xbh.politemic.biz.user.vo.GetNoticeDetailResponseVO;
+import com.xbh.politemic.common.constant.NoticeConstant;
 import com.xbh.politemic.common.enums.notice.NoticeStatusEnum;
+import com.xbh.politemic.common.enums.notice.NoticeTypeEnum;
 import com.xbh.politemic.common.util.PageUtil;
 import com.xbh.politemic.common.util.ServiceAssert;
-import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @NoticeSrv: 通知 srv
@@ -28,6 +32,8 @@ public class NoticeSrv extends BaseNoticeSrv {
     @Autowired
     private BaseUserSrv baseUserSrv;
     @Autowired
+    private UserSrv userSrv;
+    @Autowired
     private BaseSysLogSrv baseSysLogSrv;
 
     /**
@@ -37,17 +43,39 @@ public class NoticeSrv extends BaseNoticeSrv {
      * @author: ZBoHang
      * @time: 2021/12/13 16:24
      */
-    public Integer getUnReadNoticeCnt(String userId) {
-
-        Example example = Example.builder(Notice.class).build();
+    public Map<String, Integer> getUnReadNoticeCnt(String userId) {
+        // 通知
+        Example unReadNoticeExample = Example.builder(Notice.class).build();
+        // 私信
+        Example unReadPrivateLetterExample = Example.builder(Notice.class).build();
         // 构建查询条件
-        Example.Criteria criteria = example.createCriteria();
-        // 未读状态的 通知状态 0-未读 1-已读 2-删除
-        criteria.andEqualTo("status", NoticeStatusEnum.UNREAD_STATUS.getCode())
+        Example.Criteria unReadNoticeCriteria = unReadNoticeExample.createCriteria();
+
+        Example.Criteria unReadPrivateLetterCriteria = unReadPrivateLetterExample.createCriteria();
+        // 未读状态的通知 0-未读 1-已读 2-删除
+        unReadNoticeCriteria.andEqualTo("status", NoticeStatusEnum.UNREAD_STATUS.getCode())
                 // 接收方为 userId用户的
-                .andEqualTo("toId", userId);
-        // 查找个数
-        return this.selectCountByExample(example);
+                .andEqualTo("toId", userId)
+                // 系统通知 fromId 字段为空
+                .andIsNull("fromId");
+        // 未读状态的私信 0-未读 1-已读 2-删除
+        unReadPrivateLetterCriteria.andEqualTo("status", NoticeStatusEnum.UNREAD_STATUS.getCode())
+                // 接收方为 userId用户的
+                .andEqualTo("toId", userId)
+                // 用户私信 fromId 字段不为空
+                .andIsNotNull("fromId");
+        // 查找未读通知个数
+        Integer unReadNoticeCnt = this.selectCountByExample(unReadNoticeExample);
+        // 查找未读私信个数
+        Integer unReadPrivateLetterCnt = this.selectCountByExample(unReadPrivateLetterExample);
+
+        Map<String, Integer> resultMap = new HashMap(){
+            {
+                put("notice", unReadNoticeCnt);
+                put("letter", unReadPrivateLetterCnt);
+            }
+        };
+        return resultMap;
     }
 
     /**
@@ -58,7 +86,7 @@ public class NoticeSrv extends BaseNoticeSrv {
      * @author: ZBoHang
      * @time: 2021/12/13 17:07
      */
-    public GetNoticeDetailResponseVO getNoticeDetail(String noticeId, String userId) {
+    public GetNoticeDetailResponseVO getNoticeDetail(String noticeId, String userId, String token) {
         // 查询通知详情
         Notice notice = this.selectByPrimaryKey(noticeId);
 
@@ -67,36 +95,66 @@ public class NoticeSrv extends BaseNoticeSrv {
         ServiceAssert.isTrue(StrUtil.equals(userId, notice.getToId()), "没有权限读取通知详情!");
         // 被删除的通知无法查看
         ServiceAssert.isFalse(StrUtil.equals(notice.getStatus(), NoticeStatusEnum.DELETE_STATUS.getCode()), "通知已删除,不能查看!");
-
+        // 通知方 不填为系统通知 有值则为私信(对应用户id)
         String fromId = notice.getFromId();
         // 默认系统通知
-        String userName = "系统通知";
+        String userName = NoticeConstant.SYSTEM_NOTICE_FROM_NAME;
         // 当来源方不为空时 即来源方不为系统时
         if (StrUtil.isNotBlank(fromId)) {
             // 获取通知来源方名称
-            userName = this.baseUserSrv.selectByPrimaryKey(fromId).getUserName();
+            userName = this.userSrv.getUserInfoByToken(token).getUserName();
         }
-
+        // 构建响应 vo
         return GetNoticeDetailResponseVO.build(notice, userName);
     }
 
-
-    public PageUtil<SysLog> pageNotice(PageNoticeRequestVO vo) {
+    /**
+     * 分页获取 私信/通知 默认未读通知
+     * @param vo 请求参数
+     * @return: com.xbh.politemic.common.util.PageUtil<com.xbh.politemic.biz.log.domain.SysLog>
+     * @author: ZBoHang
+     * @time: 2021/12/14 11:27
+     */
+    public PageUtil<PageNoticeResponseVO> pageNotice(PageNoticeRequestVO vo, String userId, String token) {
         // 当前页数
         Integer pageNum = vo.getCurrentPageNum();
         // 每页数据大小
         Integer pageSize = vo.getCurrentPageSize();
+        // 筛选条件 状态
+        String noticeStatus = vo.getStatus();
+        // 筛选条件 类型
+        String noticeType = vo.getType();
 
-        Example example = Example.builder(SysLog.class).build();
+        Example example = Example.builder(Notice.class).build();
 
         Example.Criteria criteria = example.createCriteria();
+        // 接收方为 userId用户的
+        criteria.andEqualTo("toId", userId)
+                // 状态默认未读
+                .andEqualTo("status", NoticeStatusEnum.getStatusByStr(noticeStatus));
+        // 类型
+        if (StrUtil.equals(NoticeTypeEnum.LETTER.getCode(), noticeType)) {
+            // 若为letter 则为私信
+            criteria.andIsNotNull("fromId");
+        } else {
+            // 其它则为通知(默认类型通知)
+            criteria.andIsNull("fromId");
+        }
+        // 总数
+        Integer count = this.selectCountByExample(example);
+        // 分页列表数据
+        List<Notice> noticeList = this.selectByRowBounds(example, pageNum, pageSize);
 
-        criteria.andLessThanOrEqualTo("id", 8);
-
-        Integer count = this.baseSysLogSrv.selectCountByExample(example);
-
-        List<SysLog> list = this.baseSysLogSrv.selectByRowBounds(example, new RowBounds((pageNum - 1) * pageSize, pageSize));
-
-        return new PageUtil<SysLog>(pageNum, pageSize, count.longValue(), list);
+        List<PageNoticeResponseVO> voList;
+        // 再次判断是私信还是通知
+        if (StrUtil.equals(NoticeTypeEnum.LETTER.getCode(), noticeType)) {
+            // 构建私信列表
+            voList = PageNoticeResponseVO.buildUserLetter(noticeList);
+        } else {
+            // 构建系统通知列表
+            voList = PageNoticeResponseVO.buildSystemNotice(noticeList, NoticeConstant.SYSTEM_NOTICE_FROM_NAME);
+        }
+        // 返回page
+        return new PageUtil<>(pageNum, pageSize, count.longValue(), voList);
     }
 }
