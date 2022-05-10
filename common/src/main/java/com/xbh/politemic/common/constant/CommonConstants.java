@@ -47,4 +47,24 @@ public class CommonConstants {
      */
     public static final String CHARACTER_ENCODING_CONTENT_TYPE = "UTF-8";
 
+    /**
+     * 咖啡因 初始容量
+     */
+    public static final int CAFFEINE_CONFIG_INIT_CAPACITY = 36;
+
+    /**
+     * 咖啡因 最大容量
+     */
+    public static final long CAFFEINE_CONFIG_MAX_SIZE = 180;
+
+    /**
+     * 咖啡因 刷新间隔 单位 s
+     */
+    public static final long CAFFEINE_CONFIG_REFRESH_SPACE = 60 * 10;
+
+    /**
+     * 咖啡因 过期时间 单位 s
+     */
+    public static final long CAFFEINE_CONFIG_EXPIRE = 60 * 60;
+
 }
