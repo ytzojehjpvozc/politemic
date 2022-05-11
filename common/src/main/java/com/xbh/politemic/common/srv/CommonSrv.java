@@ -56,7 +56,16 @@ public abstract class CommonSrv<T> {
     }
 
     /**
-     * 分页查询
+     * 通过record查找个数
+     * @author: ZBoHang
+     * @time: 2021/12/9 15:30
+     */
+    public int selectCount(T t) {
+        return this.commonMapper.selectCount(t);
+    }
+
+    /**
+     * 分页查询 通过条件
      * @param example 条件
      * @param pageNum 当前页 从1开始
      * @param pageSize 当前页数据量 大于0
@@ -64,8 +73,21 @@ public abstract class CommonSrv<T> {
      * @author: ZBoHang
      * @time: 2021/12/14 14:00
      */
-    public List<T> selectByRowBounds(Object example, Integer pageNum, Integer pageSize) {
+    public List<T> selectByExampleAndRowBounds(Object example, Integer pageNum, Integer pageSize) {
          return this.commonMapper.selectByExampleAndRowBounds(example, new RowBounds((pageNum - 1) * pageSize, pageSize));
+    }
+
+    /**
+     * 分页查询 通过实体
+     * @param t
+     * @param pageNum 当前页 从1开始
+     * @param pageSize 当前页数据量 大于0
+     * @return: java.util.List<T>
+     * @author: ZBoHang
+     * @time: 2021/12/15 11:31
+     */
+    public List<T> selectByRowBounds(T t, Integer pageNum, Integer pageSize) {
+        return this.commonMapper.selectByRowBounds(t, new RowBounds((pageNum - 1) * pageSize, pageSize));
     }
 
     /**

@@ -61,9 +61,9 @@ public class NoticeController {
     @ApiImplicitParam(name = "noticeId", value = "通知id", paramType = "path")
     @GetMapping("getNoticeDetail/{noticeId}")
     @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "获取通知/私信详情", remark = "有权限校验")
-    public Result getNoticeDetail(@PathVariable(name = "noticeId", required = false) String noticeId) {
+    public Result getNoticeDetail(@PathVariable(name = "noticeId", required = false) Integer noticeId) {
 
-        ApiAssert.noneBlank(noticeId, "noticeId参数不能为空!");
+        ApiAssert.isTrue(noticeId != null && noticeId > 0, "noticeId参数不能为空!");
         // 用户id
         String userId = ThreadLocalUtil.getUserId();
         // 用户令牌

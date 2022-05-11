@@ -1,5 +1,6 @@
 package com.xbh.politemic.biz.user.builder;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.xbh.politemic.biz.user.domain.SysUser;
@@ -11,8 +12,6 @@ import com.xbh.politemic.common.enums.user.UserAuthFieldLevelEnum;
 import com.xbh.politemic.common.enums.user.UserStatusEnum;
 import com.xbh.politemic.common.util.StrKit;
 import org.springframework.core.env.Environment;
-
-import java.sql.Timestamp;
 
 /**
  * @UserDTO: 用户业务数据传输转换
@@ -36,7 +35,8 @@ public class UserBuilder {
 
                     .setToken(token)
 
-                    .setExpire(new Timestamp(System.currentTimeMillis() + UserConstant.TOKEN_TIME_OUT_IN_DB));
+                    .setExpire(DateUtil.date(System.currentTimeMillis() + UserConstant.TOKEN_TIME_OUT_IN_DB));
+
 
         }
 

@@ -1,10 +1,9 @@
 package com.xbh.politemic.biz.log.builder;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.xbh.politemic.biz.log.domain.ExceptionLog;
 import com.xbh.politemic.biz.log.domain.SysLog;
-
-import java.sql.Timestamp;
 
 /**
  * @LogDTO: 日志模块数据传输转换
@@ -48,7 +47,7 @@ public class LogBuilder {
                     // ip地址
                     .setIp(ipAddress)
                     // 请求时间
-                    .setTime(new Timestamp(System.currentTimeMillis()));
+                    .setTime(DateUtil.date());
         }
         return sysLog;
     }
@@ -68,7 +67,7 @@ public class LogBuilder {
             // 异常堆栈
             exceptionLog = new ExceptionLog().setTrace(trace)
                     // 日期
-                    .setDatetime(new Timestamp(System.currentTimeMillis()));
+                    .setDatetime(DateUtil.date());
         }
         return exceptionLog;
     }

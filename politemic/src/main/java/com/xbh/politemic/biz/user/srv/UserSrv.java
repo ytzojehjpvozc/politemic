@@ -20,6 +20,7 @@ import com.xbh.politemic.common.enums.user.UserStatusEnum;
 import com.xbh.politemic.common.util.ServiceAssert;
 import com.xbh.politemic.common.util.StrKit;
 import com.xbh.politemic.task.AsyncTask;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -90,8 +91,8 @@ public class UserSrv extends BaseUserSrv {
         String originalToken = userToken != null ? userToken.getToken() : StrUtil.EMPTY;
         // 构建新的token
         userToken = UserBuilder.buildNewToken(user.getId(), token);
-        // 保存令牌 和 用户信息
-        this.saveUserToken(userToken, originalToken, user);
+        // 保存令牌 和 用户信息  同类中未开启事务方法调用事务方法，事务不生效
+        ((UserSrv) AopContext.currentProxy()).saveUserToken(userToken, originalToken, user);
         // 返回map initialCapacity = 数量 / 负载因子 + 1
         Map<String, Object> resMap = new HashMap<>(4);
 
@@ -134,6 +135,7 @@ public class UserSrv extends BaseUserSrv {
      * @author: zhengbohang
      * @date: 2021/10/4 16:24
      */
+    @Transactional(rollbackFor = Exception.class)
     public String activate(String id, String activateCode) {
         // 得到数据库的验证码
         String validCode = this.selectByPrimaryKey(id).getActivationCode();

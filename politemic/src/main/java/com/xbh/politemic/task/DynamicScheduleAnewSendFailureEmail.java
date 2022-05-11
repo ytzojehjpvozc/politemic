@@ -1,5 +1,6 @@
 package com.xbh.politemic.task;
 
+import cn.hutool.core.date.DateUtil;
 import com.xbh.politemic.biz.queue.domain.QueueMsg;
 import com.xbh.politemic.biz.queue.srv.BaseQueueSrv;
 import com.xbh.politemic.common.constant.QueueConstant;
@@ -18,7 +19,6 @@ import org.springframework.scheduling.support.CronTrigger;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
-import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -57,7 +57,7 @@ public class DynamicScheduleAnewSendFailureEmail implements SchedulingConfigurer
 
             criteria.andNotEqualTo(QueueConstant.MSG_STATUS_COLUMN_NAME, QueueMsgStatusEnum.MSG_CONSUMED.getCode())
 
-                    .andGreaterThan(QueueConstant.MSG_CREATE_TIME_COLUMN_NAME, new Timestamp(System.currentTimeMillis() - QueueConstant.ONE_DAY))
+                    .andGreaterThan(QueueConstant.MSG_CREATE_TIME_COLUMN_NAME, DateUtil.date(System.currentTimeMillis() - QueueConstant.ONE_DAY))
                     // 队列消息表中消息类型 0-邮件消息 1-获取用户评论尾巴消息 2-帖子审核消息
                     .andEqualTo(QueueConstant.MSG_TYPE_COLUMN_NAME, QueueMsgTypeEnum.MSG_SEND_EMAIL.getCode());
 

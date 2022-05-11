@@ -58,13 +58,18 @@ public class CommonConstants {
     public static final long CAFFEINE_CONFIG_MAX_SIZE = 180;
 
     /**
-     * 咖啡因 刷新间隔 单位 s
+     * 咖啡因 分页帖子列表 刷新间隔 单位 s
      */
-    public static final long CAFFEINE_CONFIG_REFRESH_SPACE = 60 * 10;
+    public static final long CAFFEINE_CONFIG_REFRESH_SPACE_PAGE_GET_POSTS = 60 * 5;
 
     /**
-     * 咖啡因 过期时间 单位 s
+     * 咖啡因 分页讨论帖 过期时间 单位 s
      */
     public static final long CAFFEINE_CONFIG_EXPIRE = 60 * 60;
+
+    /**
+     * coffeine中分页讨论帖的键 前缀
+     */
+    public static final String CAFFEINE_CONFIG_PAGE_GET_POSTS_PRE = "Caffeine_pageGetPosts_";
 
 }

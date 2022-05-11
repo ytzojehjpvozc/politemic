@@ -1,11 +1,10 @@
 package com.xbh.politemic.biz.notice.srv;
 
 import cn.hutool.core.util.StrUtil;
-import com.xbh.politemic.biz.log.srv.BaseSysLogSrv;
+import com.xbh.politemic.biz.notice.builder.NoticeBuilder;
 import com.xbh.politemic.biz.notice.domain.Notice;
 import com.xbh.politemic.biz.notice.vo.PageNoticeRequestVO;
 import com.xbh.politemic.biz.notice.vo.PageNoticeResponseVO;
-import com.xbh.politemic.biz.user.srv.BaseUserSrv;
 import com.xbh.politemic.biz.user.srv.UserSrv;
 import com.xbh.politemic.biz.user.vo.GetNoticeDetailResponseVO;
 import com.xbh.politemic.common.constant.NoticeConstant;
@@ -15,6 +14,7 @@ import com.xbh.politemic.common.util.PageUtil;
 import com.xbh.politemic.common.util.ServiceAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.HashMap;
@@ -30,11 +30,7 @@ import java.util.Map;
 public class NoticeSrv extends BaseNoticeSrv {
 
     @Autowired
-    private BaseUserSrv baseUserSrv;
-    @Autowired
     private UserSrv userSrv;
-    @Autowired
-    private BaseSysLogSrv baseSysLogSrv;
 
     /**
      * 获取指定用户未读通知个数 通过用户id
@@ -69,13 +65,12 @@ public class NoticeSrv extends BaseNoticeSrv {
         // 查找未读私信个数
         Integer unReadPrivateLetterCnt = this.selectCountByExample(unReadPrivateLetterExample);
 
-        Map<String, Integer> resultMap = new HashMap(){
+        return new HashMap<String, Integer>(){
             {
                 put("notice", unReadNoticeCnt);
                 put("letter", unReadPrivateLetterCnt);
             }
         };
-        return resultMap;
     }
 
     /**
@@ -86,7 +81,8 @@ public class NoticeSrv extends BaseNoticeSrv {
      * @author: ZBoHang
      * @time: 2021/12/13 17:07
      */
-    public GetNoticeDetailResponseVO getNoticeDetail(String noticeId, String userId, String token) {
+    @Transactional(rollbackFor = Exception.class)
+    public GetNoticeDetailResponseVO getNoticeDetail(Integer noticeId, String userId, String token) {
         // 查询通知详情
         Notice notice = this.selectByPrimaryKey(noticeId);
 
@@ -95,6 +91,10 @@ public class NoticeSrv extends BaseNoticeSrv {
         ServiceAssert.isTrue(StrUtil.equals(userId, notice.getToId()), "没有权限读取通知详情!");
         // 被删除的通知无法查看
         ServiceAssert.isFalse(StrUtil.equals(notice.getStatus(), NoticeStatusEnum.DELETE_STATUS.getCode()), "通知已删除,不能查看!");
+        // 构建一个已读状态的通知
+        Notice readStatusNotice = NoticeBuilder.buildReadStatusNotice(noticeId);
+        // 读取详情后修改状态
+        this.updateByPrimaryKeySelective(readStatusNotice);
         // 通知方 不填为系统通知 有值则为私信(对应用户id)
         String fromId = notice.getFromId();
         // 默认系统通知
@@ -128,6 +128,9 @@ public class NoticeSrv extends BaseNoticeSrv {
         Example example = Example.builder(Notice.class).build();
 
         Example.Criteria criteria = example.createCriteria();
+        // 按时间倒序
+        example.setOrderByClause("time DESC");
+
         // 接收方为 userId用户的
         criteria.andEqualTo("toId", userId)
                 // 状态默认未读
@@ -143,7 +146,7 @@ public class NoticeSrv extends BaseNoticeSrv {
         // 总数
         Integer count = this.selectCountByExample(example);
         // 分页列表数据
-        List<Notice> noticeList = this.selectByRowBounds(example, pageNum, pageSize);
+        List<Notice> noticeList = this.selectByExampleAndRowBounds(example, pageNum, pageSize);
 
         List<PageNoticeResponseVO> voList;
         // 再次判断是私信还是通知

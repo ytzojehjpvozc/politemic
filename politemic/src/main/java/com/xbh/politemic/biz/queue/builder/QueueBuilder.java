@@ -1,10 +1,9 @@
 package com.xbh.politemic.biz.queue.builder;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.xbh.politemic.biz.queue.domain.QueueMsg;
 import com.xbh.politemic.common.enums.queue.QueueMsgStatusEnum;
-
-import java.sql.Timestamp;
 
 /**
  * @QueueDTO: 队列模型数据传输转换
@@ -28,7 +27,7 @@ public class QueueBuilder {
             // 消息id
             queueMsg = new QueueMsg().setId(msgId)
                     // 生产时间
-                    .setProductTime(new Timestamp(System.currentTimeMillis()))
+                    .setProductTime(DateUtil.date())
                     // 回执数据
                     .setMsgCorrelationData(msgId)
                     // 0-消息初始状态  1-消息进入队列状态  2-消息被消费状态
@@ -54,7 +53,7 @@ public class QueueBuilder {
                     // 0-消息初始状态  1-消息进入队列状态  2-消息被消费状态
                     .setStatus(QueueMsgStatusEnum.MSG_CONSUMED.getCode())
                     // 消费时间
-                    .setConsumTime(new Timestamp(System.currentTimeMillis()));
+                    .setConsumTime(DateUtil.date());
         }
         return queueMsg;
     }

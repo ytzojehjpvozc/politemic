@@ -38,10 +38,13 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
         if (handler instanceof HandlerMethod) {
             // 获取请求对应控制器上的NoneNeedLogin注解
             NoneNeedLogin noneNeedLogin = ((HandlerMethod) handler).getMethodAnnotation(NoneNeedLogin.class);
+            // 拿到请求中的令牌
+            String token = HttpServletUtil.getUserToken(request);
+            // 设置用户令牌至本地线程副本中
+            ThreadLocalUtil.setToken(token);
 
             if (noneNeedLogin == null) {
-                // 拿到请求中的令牌
-                String token = HttpServletUtil.getUserToken(request);
+
                 // 无令牌 拦截请求 返回权限异常
                 if (StrUtil.isBlank(token)) {
 
@@ -57,8 +60,6 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
                 this.setMDC(userId);
                 // 设置用户id至本地线程副本中
                 ThreadLocalUtil.setUserId(userId);
-                // 设置用户令牌至本地线程副本中
-                ThreadLocalUtil.setToken(token);
             }
         }
         // 放行

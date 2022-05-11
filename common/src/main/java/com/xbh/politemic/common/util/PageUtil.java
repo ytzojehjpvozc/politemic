@@ -27,17 +27,17 @@ public class PageUtil<T> {
     /**
      * 总页数
      */
-    protected Long totalPageSize;
+    private Long totalPageSize;
 
     /**
      * 总结果条数
      */
-    protected Long totalResultSize;
+    private Long totalResultSize;
 
     /**
      * 数据
      */
-    protected List<T> data;
+    private List<T> data;
 
     public PageUtil() {
     }

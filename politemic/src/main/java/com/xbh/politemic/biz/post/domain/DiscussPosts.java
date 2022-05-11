@@ -60,5 +60,10 @@ public class DiscussPosts implements Serializable {
      */
     private String content;
 
+    /**
+     * 帖子公开性 1-公开 2-私密 仅自己可见 默认公开
+     */
+    private String confessed;
+
     private static final long serialVersionUID = 1L;
 }

@@ -18,6 +18,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.AmqpHeaders;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
@@ -101,8 +102,8 @@ public class TakeTailQueue {
         if (StrUtil.isNotBlank(tailStr)) {
             // 获取古诗文正文
             String content = JSONUtil.parseObj(tailStr).getStr("content");
-            // 修改队列消息表中的消息状态
-            this.customOverModifyMsgStatus(msgId, userId, content);
+            // 修改队列消息表中的消息状态 同类中未开启事务方法调用事务方法，事务不生效
+            ((TakeTailQueue) AopContext.currentProxy()).customOverModifyMsgStatus(msgId, userId, content);
         }
     }
 

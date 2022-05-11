@@ -1,5 +1,6 @@
 package com.xbh.politemic.task;
 
+import cn.hutool.core.date.DateUtil;
 import com.xbh.politemic.biz.queue.domain.QueueMsg;
 import com.xbh.politemic.biz.queue.srv.BaseQueueSrv;
 import com.xbh.politemic.common.constant.QueueConstant;
@@ -18,7 +19,6 @@ import org.springframework.scheduling.support.CronTrigger;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
-import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -60,7 +60,7 @@ public class DynamicScheduleTakeTail implements SchedulingConfigurer {
 
                     .andNotEqualTo(QueueConstant.MSG_STATUS_COLUMN_NAME, QueueMsgStatusEnum.MSG_CONSUMED.getCode())
 
-                    .andGreaterThan(QueueConstant.MSG_CREATE_TIME_COLUMN_NAME, new Timestamp(System.currentTimeMillis() - QueueConstant.ONE_DAY));
+                    .andGreaterThan(QueueConstant.MSG_CREATE_TIME_COLUMN_NAME, DateUtil.date(System.currentTimeMillis() - QueueConstant.ONE_DAY));
             // 查找
             List<QueueMsg> list = this.baseQueueSrv.selectByExample(example);
             // 如果错误消息

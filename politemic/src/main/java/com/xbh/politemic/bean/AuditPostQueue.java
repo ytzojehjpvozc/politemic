@@ -23,6 +23,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.AmqpHeaders;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
@@ -118,8 +119,8 @@ public class AuditPostQueue {
         } else {
             // 无敏感词汇
             notice.setContent(StrUtil.format(this.NOTICE_CONTENT, "通过"));
-            //  1-发表后待审核  2-正常  3-精华帖  4-管理删除、审核未通过的拉黑帖
-            this.customOverModifyMsgStatus(msgId, postId, PostStatusEnum.NORMAL.getCode(), notice);
+            //  1-发表后待审核  2-正常  3-精华帖  4-管理删除、审核未通过的拉黑帖   同类中未开启事务方法调用事务方法，事务不生效
+            ((AuditPostQueue) AopContext.currentProxy()).customOverModifyMsgStatus(msgId, postId, PostStatusEnum.NORMAL.getCode(), notice);
         }
     }
 

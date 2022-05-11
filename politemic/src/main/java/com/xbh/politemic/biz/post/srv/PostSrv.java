@@ -1,12 +1,30 @@
 package com.xbh.politemic.biz.post.srv;
 
+import cn.hutool.core.util.StrUtil;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.xbh.politemic.biz.post.builder.PostBuilder;
 import com.xbh.politemic.biz.post.domain.DiscussPosts;
+import com.xbh.politemic.biz.post.vo.GetPostDetailResponseVO;
+import com.xbh.politemic.biz.post.vo.PageGetPostsRequestVO;
+import com.xbh.politemic.biz.post.vo.PageGetPostsResponseVO;
+import com.xbh.politemic.biz.post.vo.PulishPostRequestVO;
+import com.xbh.politemic.biz.user.domain.SysUser;
+import com.xbh.politemic.biz.user.srv.UserSrv;
+import com.xbh.politemic.common.constant.CommonConstants;
+import com.xbh.politemic.common.enums.post.PostConfessionEnum;
+import com.xbh.politemic.common.enums.post.PostStatusEnum;
+import com.xbh.politemic.common.util.PageUtil;
+import com.xbh.politemic.common.util.ServiceAssert;
 import com.xbh.politemic.task.AsyncTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @PostSrvImpl: 帖子业务层接口实现类
@@ -14,7 +32,7 @@ import org.springframework.stereotype.Service;
  * @time: 2021/10/15 14:25
  */
 @Service
-public class PostSrv {
+public class PostSrv extends BasePostSrv {
 
     private static final Logger log = LoggerFactory.getLogger(PostSrv.class);
 
@@ -24,23 +42,117 @@ public class PostSrv {
     private final String CREATE_POST_INIT_TYPE = "1";
 
     @Autowired
-    private BasePostSrv basePostSrv;
-    @Autowired
     private AsyncTask asyncTask;
+    @Autowired
+    private UserSrv userSrv;
+    @Resource
+    private LoadingCache<String, List<DiscussPosts>> postsListCaffeine;
 
     /**
      * 发布帖子
      * @author: ZBoHang
      * @time: 2021/10/19 15:56
      */
-    public String publishPost(String title, String content, String userId) {
+    @Transactional(rollbackFor = Exception.class)
+    public String publishPost(PulishPostRequestVO vo, String userId) {
         // 构建一个初始化帖子
-        DiscussPosts discussPosts = PostBuilder.buildInitiallyPost(title, content, userId);
+        DiscussPosts discussPosts = PostBuilder.buildInitiallyPost(vo, userId);
         // 持久化帖子
-        this.basePostSrv.insertSelective(discussPosts);
+        this.insertSelective(discussPosts);
         // 异步审核帖子
         this.asyncTask.auditPost(discussPosts);
 
         return "帖子发布成功,等待审核!";
     }
+
+    /**
+     * 分页获取帖子列表
+     * @param vo
+     * @return: void
+     * @author: ZBoHang
+     * @time: 2021/12/15 11:37
+     */
+    public PageUtil<PageGetPostsResponseVO> pageGetPosts(PageGetPostsRequestVO vo, String token) {
+
+        Integer pageNum = vo.getCurrentPageNum();
+
+        Integer pageSize = vo.getCurrentPageSize();
+        // 私密帖子要检查令牌
+        if (StrUtil.equals(PostConfessionEnum.PRIVACY.getCode(), vo.getConfessed())) {
+
+            SysUser sysUser = this.userSrv.getUserInfoByToken(token);
+
+            ServiceAssert.notNull(sysUser, "未登录不能获取私密帖子!");
+        }
+        // 构建分页获取帖子列表的帖子实体
+        DiscussPosts dp = PostBuilder.buildPageGetPosts(vo);
+        // 查找个数
+        Integer count = this.selectCount(dp);
+        // 尝试从 caffeine 中获取
+        List<DiscussPosts> list = this.postsListCaffeine.get(CommonConstants.CAFFEINE_CONFIG_PAGE_GET_POSTS_PRE + dp.getType() + StrUtil.UNDERLINE + dp.getStatus()
+                // key中拼接分页参数
+                + StrUtil.UNDERLINE + dp.getConfessed() + StrUtil.UNDERLINE + pageNum + StrUtil.UNDERLINE + pageSize);
+
+        if (list == null || list.isEmpty()) {
+            // 获取帖子列表 从数据库中
+            list = this.getPostsOnDB(dp, pageNum, pageSize);
+        }
+        // 构建分页获取帖子列表响应对象
+        List<PageGetPostsResponseVO> voList = list.stream().map(PageGetPostsResponseVO::build)
+                // 排序收集
+                .sorted((o1, o2) -> o1.getCreateTime().after(o2.getCreateTime()) ? -1 : 1).collect(Collectors.toList());
+
+        return new PageUtil<>(pageNum, pageSize, count.longValue(), voList);
+    }
+
+    /**
+     * 查询帖子详情
+     * @param postId 帖子id
+     * @param token 用户令牌
+     * @return: com.xbh.politemic.biz.post.vo.GetPostDetailResponseVO
+     * @author: ZBoHang
+     * @time: 2021/12/15 17:39
+     */
+    public GetPostDetailResponseVO getPostDetail(String postId, String token) {
+        // 查询帖子
+        DiscussPosts dp = this.selectByPrimaryKey(postId);
+
+        ServiceAssert.notNull(dp, "查询的帖子不存在!");
+        // 未审核 或者 被删除
+        ServiceAssert.isTrue(StrUtil.equals(PostStatusEnum.NORMAL.getCode(), dp.getStatus())
+
+                || StrUtil.equals(PostStatusEnum.ESSENCE.getCode(), dp.getStatus()), "查询的帖子未审核或者已删除!");
+        // 帖子如果是私密的
+        if (StrUtil.equals(PostConfessionEnum.PRIVACY.getCode(), dp.getConfessed())) {
+
+            ServiceAssert.isTrue(StrUtil.isNotBlank(token), "未登录不能查询该帖子!");
+
+            String userId = this.userSrv.getUserInfo(token).getId();
+
+            ServiceAssert.isTrue(userId.equals(dp.getUserId()), "没有权限查看该帖子!");
+        }
+
+        return GetPostDetailResponseVO.build(dp);
+    }
+
+    /**
+     * 获取帖子列表 从数据库中
+     * @param dp 实体条件
+     * @param pageNum 当前页
+     * @param pageSize 当前页数据量
+     * @return: java.util.List<com.xbh.politemic.biz.post.vo.PageGetPostsResponseVO>
+     * @author: ZBoHang
+     * @time: 2021/12/15 16:02
+     */
+    private List<DiscussPosts> getPostsOnDB(DiscussPosts dp, Integer pageNum, Integer pageSize) {
+        // 查找到数据
+        List<DiscussPosts> list = this.selectByRowBounds(dp, pageNum, pageSize);
+        // 存储到caffeine中
+        this.postsListCaffeine.put(CommonConstants.CAFFEINE_CONFIG_PAGE_GET_POSTS_PRE + dp.getType() + StrUtil.UNDERLINE + dp.getStatus()
+                // key中拼接分页参数
+                + StrUtil.UNDERLINE + dp.getConfessed() + StrUtil.UNDERLINE + pageNum + StrUtil.UNDERLINE + pageSize, list);
+
+       return list;
+    }
+
 }
