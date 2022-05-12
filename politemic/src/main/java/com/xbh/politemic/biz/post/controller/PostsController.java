@@ -73,6 +73,13 @@ public class PostsController {
         return Result.success(this.postSrv.pageGetPosts(vo, token));
     }
 
+    /**
+     * 获取帖子详情
+     * @param postId 帖子id
+     * @return: com.xbh.politemic.common.util.Result
+     * @author: ZBoHang
+     * @time: 2021/12/15 18:04
+     */
     @ApiOperation("获取帖子详情")
     @ApiImplicitParam(name = "postId", value = "帖子id", paramType = "path")
     @NoneNeedLogin
