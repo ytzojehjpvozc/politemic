@@ -1,12 +1,21 @@
 # politemic
 
 #### 介绍
+
 简单的博客系统 建造中···
 
 #### 软件架构
 软件架构说明
 
-1.用户注册
+###### 1.用户注册流程
+
+![](C:\Users\admin\Downloads\politemic_doc\用户注册模块.png)
+
+###### 2.用户登录流程
+
+![](C:\Users\admin\Downloads\politemic_doc\用户登录模块.png)
+
+
 
 
 #### 安装教程
