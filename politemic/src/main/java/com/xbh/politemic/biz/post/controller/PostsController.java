@@ -47,8 +47,6 @@ public class PostsController {
 
         String userId = ThreadLocalUtil.getUserId();
 
-        ApiAssert.noneBlank(userId, "未登录不能发布帖子!");
-
         return Result.success(this.postSrv.publishPost(vo, userId));
     }
 

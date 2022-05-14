@@ -32,7 +32,7 @@ public class Comment implements Serializable {
     private String targetId;
 
     /**
-     * 评论状态 0-正常 1-删除 2-禁用
+     * 评论状态 0-发布等待审核 1-正常 2-删除 3-禁用
      */
     private String status;
 

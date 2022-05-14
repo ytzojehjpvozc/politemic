@@ -87,7 +87,7 @@ public class NoticeSrv extends BaseNoticeSrv {
         Notice notice = this.selectByPrimaryKey(noticeId);
 
         ServiceAssert.notNull(notice, "未获取到通知详情!");
-        // 私信接受用户必须为当前登录用户
+        // 接受用户必须为当前登录用户
         ServiceAssert.isTrue(StrUtil.equals(userId, notice.getToId()), "没有权限读取通知详情!");
         // 被删除的通知无法查看
         ServiceAssert.isFalse(StrUtil.equals(notice.getStatus(), NoticeStatusEnum.DELETE_STATUS.getCode()), "通知已删除,不能查看!");
@@ -115,7 +115,7 @@ public class NoticeSrv extends BaseNoticeSrv {
      * @author: ZBoHang
      * @time: 2021/12/14 11:27
      */
-    public PageUtil<PageNoticeResponseVO> pageNotice(PageNoticeRequestVO vo, String userId, String token) {
+    public PageUtil<PageNoticeResponseVO> pageNotice(PageNoticeRequestVO vo, String userId) {
         // 当前页数
         Integer pageNum = vo.getCurrentPageNum();
         // 每页数据大小
@@ -130,7 +130,6 @@ public class NoticeSrv extends BaseNoticeSrv {
         Example.Criteria criteria = example.createCriteria();
         // 按时间倒序
         example.setOrderByClause("time DESC");
-
         // 接收方为 userId用户的
         criteria.andEqualTo("toId", userId)
                 // 状态默认未读

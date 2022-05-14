@@ -86,10 +86,10 @@ public class AmqpConfig {
     /**
      * 帖子审核交换机与队列的bind
      */
-    @Bean
-    public Binding initAuditPostBind(@Qualifier("initAuditPostQueue") Queue queue, @Qualifier("initAuditPostExchange") FanoutExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange);
-    }
+    // @Bean
+    // public Binding initAuditPostBind(@Qualifier("initAuditPostQueue") Queue queue, @Qualifier("initAuditPostExchange") FanoutExchange exchange) {
+    //     return BindingBuilder.bind(queue).to(exchange);
+    // }
     /**
      * 定义一个callback
      * @author: ZBoHang

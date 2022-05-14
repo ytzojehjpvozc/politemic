@@ -77,6 +77,7 @@ public class QueueBuilder {
             queueMsg = new QueueMsg().setId(msgId)
                     // 关联用户id
                     .setUserId(userId)
+                    // 消息内容
                     .setMsgContent(msgContent)
                     // 0-消息初始状态  1-消息进入队列状态  2-消息被消费状态
                     .setStatus(QueueMsgStatusEnum.MSG_INIT.getCode())

@@ -1,5 +1,6 @@
 package com.xbh.politemic.bean;
 
+import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.rabbitmq.client.Channel;
 import com.xbh.politemic.biz.queue.builder.QueueBuilder;
@@ -129,7 +130,7 @@ public class MailMsgQueue {
         map.put(this.REGISTER_EMAIL_RECEIVER_KEY, email);
         map.put(this.REGISTER_EMAIL_SUBJECT_KEY, this.REGISTER_EMAIL_SUBJECT);
         map.put(this.REGISTER_EMAIL_CONTENT_KEY,  this.REGISTER_EMAIL_CONTENT);
-        String content = JSONObject.toJSONString(map);
+        String content = JSONUtil.toJsonStr(map);
         // 初始化激活邮件消息 队列消息表中消息类型 0-邮件消息 1-获取用户评论尾巴消息 2-帖子审核消息
         QueueMsg queueMsg = QueueBuilder.buildInitMsg(msgId, userId, content, QueueMsgTypeEnum.MSG_SEND_EMAIL.getCode());
         // 注册邮件推送队列前持久化 保存进数据库

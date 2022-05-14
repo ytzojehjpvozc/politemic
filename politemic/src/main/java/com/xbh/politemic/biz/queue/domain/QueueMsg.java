@@ -26,6 +26,7 @@ public class QueueMsg implements Serializable {
       0:注册邮件消息
       1:获取评论尾巴消息
       2-帖子审核消息
+      3-评论审核消息
      */
     private String type;
 

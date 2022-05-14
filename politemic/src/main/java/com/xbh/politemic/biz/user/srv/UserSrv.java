@@ -7,7 +7,6 @@ import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import com.alibaba.fastjson.JSONObject;
 import com.xbh.politemic.bean.RedisClient;
 import com.xbh.politemic.biz.user.builder.UserBuilder;
 import com.xbh.politemic.biz.user.domain.SysUser;
@@ -20,7 +19,6 @@ import com.xbh.politemic.common.enums.user.UserStatusEnum;
 import com.xbh.politemic.common.util.ServiceAssert;
 import com.xbh.politemic.common.util.StrKit;
 import com.xbh.politemic.task.AsyncTask;
-import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -28,8 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @Description: 用户-用户业务层实现类
@@ -71,7 +67,8 @@ public class UserSrv extends BaseUserSrv {
      * @author: ZBoHang
      * @time: 2021/12/10 9:19
      */
-    public Map<String, Object> doLogin(UserLoginRequestVO vo) {
+    @Transactional(rollbackFor = Exception.class)
+    public String doLogin(UserLoginRequestVO vo) {
 
         SysUser user = this.selectOne(new SysUser().setUserName(vo.getUserName()));
         // 使用用户名查找未找见 混淆视野 防止一直试
@@ -92,15 +89,9 @@ public class UserSrv extends BaseUserSrv {
         // 构建新的token
         userToken = UserBuilder.buildNewToken(user.getId(), token);
         // 保存令牌 和 用户信息  同类中未开启事务方法调用事务方法，事务不生效
-        ((UserSrv) AopContext.currentProxy()).saveUserToken(userToken, originalToken, user);
-        // 返回map initialCapacity = 数量 / 负载因子 + 1
-        Map<String, Object> resMap = new HashMap<>(4);
-
-        resMap.put("token", userToken.getToken());
-
-        resMap.put("userId", userToken.getUserId());
+        this.saveUserToken(userToken, originalToken, user);
         // TODO: 2021/10/12 登录后的数据返回
-        return resMap;
+        return token;
     }
 
     /**
@@ -197,7 +188,7 @@ public class UserSrv extends BaseUserSrv {
         // redis存储 "User_Token_" + 令牌
         this.redisClient.set(UserConstant.USER_TOKEN_PRE + userToken.getToken(),
 
-                JSONObject.toJSONString(sysUser), DateUtil.between(currentTime, expire, DateUnit.SECOND));
+                JSONUtil.toJsonStr(sysUser), DateUtil.between(currentTime, expire, DateUnit.SECOND));
 
         return sysUser;
     }
@@ -230,7 +221,6 @@ public class UserSrv extends BaseUserSrv {
      * @author: ZBoHang
      * @time: 2021/10/11 17:03
      */
-    @Transactional(rollbackFor = Exception.class)
     void saveUserToken(UserToken userToken, String originalToken, SysUser user) {
 
         if (StrUtil.equals(StrUtil.EMPTY, originalToken)) {

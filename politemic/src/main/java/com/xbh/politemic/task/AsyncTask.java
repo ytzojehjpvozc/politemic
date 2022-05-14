@@ -3,6 +3,7 @@ package com.xbh.politemic.task;
 import com.xbh.politemic.bean.AuditPostQueue;
 import com.xbh.politemic.bean.MailMsgQueue;
 import com.xbh.politemic.bean.TakeTailQueue;
+import com.xbh.politemic.biz.post.domain.Comment;
 import com.xbh.politemic.biz.post.domain.DiscussPosts;
 import com.xbh.politemic.biz.queue.domain.QueueMsg;
 import com.xbh.politemic.biz.user.domain.SysUser;
@@ -85,5 +86,10 @@ public class AsyncTask {
     @Async("CustomAsyncThreadPoolExecutor")
     public void auditPosts(List<QueueMsg> list) {
         list.forEach(queueMsg -> this.auditPostQueue.send(queueMsg.getMsgContent(), queueMsg.getMsgCorrelationData()));
+    }
+
+    @Async("CustomAsyncThreadPoolExecutor")
+    public void auditComment(Comment comment) {
+
     }
 }

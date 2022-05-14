@@ -18,7 +18,6 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.AmqpHeaders;
-import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
@@ -70,6 +69,7 @@ public class TakeTailQueue {
      * @author: zhengbohang
      * @date: 2021/10/5 17:48
      */
+    @Transactional(rollbackFor = Exception.class)
     @RabbitListener(queues = QueueConstant.TAIL_EXCHANGE_BIND_QUEUE_NAME)
     public void msgConsumer(String message, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long tag) {
         JSONObject msg = JSONObject.parseObject(message);
@@ -103,7 +103,7 @@ public class TakeTailQueue {
             // 获取古诗文正文
             String content = JSONUtil.parseObj(tailStr).getStr("content");
             // 修改队列消息表中的消息状态 同类中未开启事务方法调用事务方法，事务不生效
-            ((TakeTailQueue) AopContext.currentProxy()).customOverModifyMsgStatus(msgId, userId, content);
+            this.customOverModifyMsgStatus(msgId, userId, content);
         }
     }
 
@@ -112,7 +112,6 @@ public class TakeTailQueue {
      * @author: ZBoHang
      * @time: 2021/10/12 17:32
      */
-    @Transactional(rollbackFor = Exception.class)
     void customOverModifyMsgStatus(String msgId, String userId, String tailStr) {
         // 修改对应用户的尾巴
         this.baseUserSrv.updateByPrimaryKeySelective(new SysUser().setId(userId).setTail(tailStr));
@@ -136,7 +135,7 @@ public class TakeTailQueue {
         map.put(QueueConstant.MSG_ID_COLUMN_NAME, msgId);
         map.put(this.USER_ID_KEY, userId);
         map.put(this.TAKE_TAIL_URL_KEY, takeTailUrl);
-        String content = JSONObject.toJSONString(map);
+        String content = JSONUtil.toJsonStr(map);
         // 初始化激活邮件 --type->消息类型 0-邮件消息 1-获取用户评论尾巴消息 2-帖子审核消息
         QueueMsg queueMsg = QueueBuilder.buildInitMsg(msgId, userId, content, QueueMsgTypeEnum.MSG_TAKE_TAIL.getCode());
         // 推送队列前持久化 保存进数据库

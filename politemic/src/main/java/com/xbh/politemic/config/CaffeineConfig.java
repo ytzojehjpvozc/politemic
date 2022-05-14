@@ -2,13 +2,11 @@ package com.xbh.politemic.config;
 
 import com.github.benmanes.caffeine.cache.*;
 import com.xbh.politemic.biz.post.domain.DiscussPosts;
-import com.xbh.politemic.biz.post.srv.PostSrv;
 import com.xbh.politemic.common.constant.CommonConstants;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -26,9 +24,6 @@ public class CaffeineConfig {
 
     private static final Logger log = LoggerFactory.getLogger(CaffeineConfig.class);
 
-    @Autowired
-    private PostSrv postSrv;
-
     @Bean("postsListCaffeine")
     public LoadingCache<String, List<DiscussPosts>> loadingCache() {
 
@@ -45,7 +40,6 @@ public class CaffeineConfig {
                 .expireAfterWrite(CommonConstants.CAFFEINE_CONFIG_EXPIRE, TimeUnit.SECONDS)
                 // 设置监听
                 .writer(new CacheWriter<String, List<DiscussPosts>>() {
-
                     @Override
                     public void write(@NonNull String key, @NonNull List<DiscussPosts> value) {
                         // 缓存写入或更新 监听
@@ -78,17 +72,9 @@ public class CaffeineConfig {
                 return Collections.emptyList();
             }
 
-            /**
-             * 刷新时调用的方法
-             * @param key key
-             * @param oldValue value
-             * @return: java.util.List<com.xbh.politemic.biz.post.domain.DiscussPosts>
-             * @author: ZBoHang
-             * @time: 2021/12/15 16:17
-             */
             @Override
             public @Nullable List<DiscussPosts> reload(@NonNull String key, @NonNull List<DiscussPosts> oldValue) throws Exception {
-
+                // 刷新缓存时调用
                 log.info("@@@@@ Caffeine缓存 reload ······");
 
                 return CacheLoader.super.reload(key, oldValue);

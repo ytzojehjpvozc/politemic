@@ -28,12 +28,12 @@ public class QueueConstant {
     public static final String TAIL_EXCHANGE_BIND_QUEUE_NAME = "TailQueue";
 
     /**
-     * 帖子审核交换机名
+     * 帖子审核、评论审核 交换机名
      */
     public static final String AUDIT_POST_EXCHANGE_NAME = "AuditPost";
 
     /**
-     * 帖子审核交换机绑定的队列名
+     * 帖子审核、评论审核 交换机绑定的队列名
      */
     public static final String AUDIT_POST_EXCHANGE_BIND_QUEUE_NAME = "AuditPostQueue";
 

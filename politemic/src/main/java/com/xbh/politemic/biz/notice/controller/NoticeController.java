@@ -1,6 +1,5 @@
 package com.xbh.politemic.biz.notice.controller;
 
-import cn.hutool.core.util.StrUtil;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import com.xbh.politemic.biz.notice.srv.NoticeSrv;
 import com.xbh.politemic.biz.notice.vo.PageNoticeRequestVO;
@@ -45,8 +44,6 @@ public class NoticeController {
 
         String userId = ThreadLocalUtil.getUserId();
 
-        ApiAssert.noneBlank(userId, "未登录不能获取未读通知个数!");
-
         return Result.success(this.noticeSrv.getUnReadNoticeCnt(userId));
     }
 
@@ -68,8 +65,6 @@ public class NoticeController {
         String userId = ThreadLocalUtil.getUserId();
         // 用户令牌
         String token = ThreadLocalUtil.getToken();
-
-        ApiAssert.isTrue(StrUtil.isAllNotBlank(userId, token), "未登录不能获取通知详情!");
         // 获取 通知/私信 详情
         GetNoticeDetailResponseVO vo = this.noticeSrv.getNoticeDetail(noticeId, userId, token);
 
@@ -78,7 +73,7 @@ public class NoticeController {
 
     /**
      * 通知/私信 分页
-     * @param :
+     * @param vo :
      * @author: zhengbohang
      * @date: 2021/12/13 20:19
      */
@@ -91,12 +86,8 @@ public class NoticeController {
         ApiAssert.notNull(vo, "请求参数不能为空!");
         // 用户id
         String userId = ThreadLocalUtil.getUserId();
-        // 用户令牌
-        String token = ThreadLocalUtil.getToken();
 
-        ApiAssert.isTrue(StrUtil.isAllNotBlank(userId, token), "未登录不能分页获取通知!");
-
-        return Result.success(this.noticeSrv.pageNotice(vo, userId, token));
+        return Result.success(this.noticeSrv.pageNotice(vo, userId));
     }
 
 }
