@@ -9,6 +9,7 @@ import com.xbh.politemic.common.util.Result;
 import com.xbh.politemic.common.util.ThreadLocalUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +31,7 @@ public class CommentController {
     @ApiOperation("发布评论")
     @PostMapping("publishComment")
     @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "发布评论", remark = "发布完事审核,结果会以系统通知方式传递给用户")
-    public Result publishComment(PublishCommentRequestVO vo) {
+    public Result publishComment(@ApiParam PublishCommentRequestVO vo) {
 
         ApiAssert.notNull(vo, "请求参数不能为空");
 

@@ -20,9 +20,6 @@ import com.xbh.politemic.common.util.SensitiveWordFilter;
 import com.xbh.politemic.common.util.StrKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.annotation.Exchange;
-import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -54,22 +51,16 @@ public class AuditCommentQueue {
     /**
      * 评论id的key
      */
-    private static final String COMMENT_ID_KEY = "commentId";
+    private final String COMMENT_ID_KEY = "commentId";
     /**
-     * 帖子id的key
-     */
-    private final String POST_ID_KEY = "postId";
-    /**
-     * 帖子内容key
+     * 评论内容key
      */
     private final String COMMENT_CONTENT_KEY = "content";
-
-    private final String NOTICE_CONTENT = "评论审核完成,审核结果: {}!";
 
     @Autowired
     private BaseQueueSrv baseQueueSrv;
     @Autowired
-    private RabbitTemplate auditRabbitTemplate;
+    private RabbitTemplate commentRabbitTemplate;
     @Autowired
     private BaseCommentSrv baseCommentSrv;
     @Autowired
@@ -81,7 +72,7 @@ public class AuditCommentQueue {
      * @time: 2021/10/15 16:15
      */
     public void send(String msgContent, String correlationData) {
-        this.auditRabbitTemplate.convertAndSend(QueueConstant.AUDIT_POST_EXCHANGE_NAME, "auditComment", msgContent, new CorrelationData(correlationData));
+        this.commentRabbitTemplate.convertAndSend(QueueConstant.AUDIT_POST_EXCHANGE_NAME, "auditComment", msgContent, new CorrelationData(correlationData));
     }
 
     /**
@@ -90,16 +81,12 @@ public class AuditCommentQueue {
      * @time: 2021/10/15 16:17
      */
     @Transactional(rollbackFor = Exception.class)
-    @RabbitListener(bindings = @QueueBinding(
-                    value = @Queue(value = QueueConstant.AUDIT_POST_EXCHANGE_BIND_QUEUE_NAME, durable = "true"),
-                    exchange = @Exchange(name = QueueConstant.AUDIT_POST_EXCHANGE_NAME, durable = "true", type = "topic"),
-                    key = "auditComment")
-    )
+    @RabbitListener(queues = QueueConstant.AUDIT_COMMENT_EXCHANGE_BIND_QUEUE_NAME)
     public void msgConsumer(String message, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long tag) {
         JSONObject msg = JSONObject.parseObject(message);
         log.info("@@@@@收到mq的消息: " + msg.toJSONString());
         String msgId = msg.getString(QueueConstant.MSG_ID_COLUMN_NAME);
-        String postId = msg.getString(this.POST_ID_KEY);
+        String commentId = msg.getString(this.COMMENT_ID_KEY);
         String userId = msg.getString(this.USER_ID_KEY);
         String content = msg.getString(this.COMMENT_CONTENT_KEY);
         // 告知mq 数据已收到
@@ -120,16 +107,20 @@ public class AuditCommentQueue {
         // 初始化帖子审核完成的通知
         Notice notice = NoticeBuilder.buildUnreadStatusNotice(userId);
         // 审核完成则去修改队列消息表中的消息状态 并 修改帖子的审核状态
+        /**
+         * 通知模板
+         */
+        String NOTICE_CONTENT = "评论审核完成,审核结果: {}!";
         if (flag) {
             // 若含有敏感词汇
-            notice.setContent(StrUtil.format(this.NOTICE_CONTENT, "未通过"));
+            notice.setContent(StrUtil.format(NOTICE_CONTENT, "未通过"));
             //  1-发表后待审核  2-正常  3-精华帖  4-管理删除、审核未通过的拉黑帖
-            this.customOverModifyMsgStatus(msgId, postId, CommentStatusEnum.SHIELD.getCode(), notice);
+            this.customOverModifyMsgStatus(msgId, commentId, CommentStatusEnum.SHIELD.getCode(), notice);
         } else {
             // 无敏感词汇
-            notice.setContent(StrUtil.format(this.NOTICE_CONTENT, "通过"));
+            notice.setContent(StrUtil.format(NOTICE_CONTENT, "通过"));
             //  1-发表后待审核  2-正常  3-精华帖  4-管理删除、审核未通过的拉黑帖   同类中未开启事务方法调用事务方法，事务不生效
-            this.customOverModifyMsgStatus(msgId, postId, CommentStatusEnum.NORMAL.getCode(), notice);
+            this.customOverModifyMsgStatus(msgId, commentId, CommentStatusEnum.NORMAL.getCode(), notice);
         }
     }
 
@@ -143,7 +134,7 @@ public class AuditCommentQueue {
         this.baseNoticeSrv.insertSelective(notice);
         // 构建一个带有审核状态的评论
         Comment comment = CommentBuilder.buildCommentWithAuditStatus(commentId, commentAuditStatus);
-        // 修改帖子的状态
+        // 修改评论的状态
         this.baseCommentSrv.updateByPrimaryKeySelective(comment);
         // 构建一个被消费状态的消息
         QueueMsg queueMsg = QueueBuilder.buildConsumedMsg(msgId);
@@ -152,7 +143,7 @@ public class AuditCommentQueue {
     }
 
     /**
-     * 创建校验帖子消息并发送至队列
+     * 创建校验评论消息并发送至队列
      * @author: ZBoHang
      * @time: 2021/10/19 15:34
      */

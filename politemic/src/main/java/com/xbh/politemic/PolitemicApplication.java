@@ -11,7 +11,6 @@ import tk.mybatis.spring.annotation.MapperScan;
 @Slf4j
 @MapperScan("com.xbh.politemic.biz.*.mapper")
 @EnableAsync
-@EnableAspectJAutoProxy(exposeProxy = true)
 @SpringBootApplication
 public class PolitemicApplication {
 

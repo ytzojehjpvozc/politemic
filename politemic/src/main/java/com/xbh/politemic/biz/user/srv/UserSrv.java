@@ -3,7 +3,9 @@ package com.xbh.politemic.biz.user.srv;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Pair;
 import cn.hutool.core.lang.RegexPool;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * @Description: 用户-用户业务层实现类
@@ -68,7 +71,7 @@ public class UserSrv extends BaseUserSrv {
      * @time: 2021/12/10 9:19
      */
     @Transactional(rollbackFor = Exception.class)
-    public String doLogin(UserLoginRequestVO vo) {
+    public Map<String, String> doLogin(UserLoginRequestVO vo) {
 
         SysUser user = this.selectOne(new SysUser().setUserName(vo.getUserName()));
         // 使用用户名查找未找见 混淆视野 防止一直试
@@ -91,7 +94,7 @@ public class UserSrv extends BaseUserSrv {
         // 保存令牌 和 用户信息  同类中未开启事务方法调用事务方法，事务不生效
         this.saveUserToken(userToken, originalToken, user);
         // TODO: 2021/10/12 登录后的数据返回
-        return token;
+        return MapUtil.of(Pair.of("token", token));
     }
 
     /**

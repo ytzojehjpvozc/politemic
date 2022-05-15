@@ -12,6 +12,7 @@ import com.xbh.politemic.common.util.ThreadLocalUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -81,7 +82,7 @@ public class NoticeController {
     @ApiOperationSupport(ignoreParameters = {"data", "totalPageSize", "totalResultSize"})
     @GetMapping("pageNotice")
     @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "通知/私信分页", remark = "分页逻辑在于业务层,默认未读通知")
-    public Result pageNotice(PageNoticeRequestVO vo) {
+    public Result pageNotice(@ApiParam PageNoticeRequestVO vo) {
 
         ApiAssert.notNull(vo, "请求参数不能为空!");
         // 用户id

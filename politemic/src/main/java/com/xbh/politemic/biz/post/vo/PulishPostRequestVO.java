@@ -1,5 +1,7 @@
 package com.xbh.politemic.biz.post.vo;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -12,6 +14,7 @@ import java.io.Serializable;
  */
 @Data
 @Accessors(chain = true)
+@ApiModel
 public class PulishPostRequestVO implements Serializable {
 
     private static final long serialVersionUID = 5999889818973676948L;
@@ -19,15 +22,18 @@ public class PulishPostRequestVO implements Serializable {
     /**
      * 帖子主题
      */
+    @ApiModelProperty("帖子主题")
     private String title;
 
     /**
      * 帖子内容
      */
+    @ApiModelProperty("帖子内容")
     private String content;
 
     /**
      * 帖子公开性 1-公开 2-私密 仅自己可见 默认公开
      */
+    @ApiModelProperty("帖子公开性 1-公开 2-私密 仅自己可见 默认公开")
     private String confessed;
 }

@@ -9,10 +9,7 @@ import com.xbh.politemic.common.constant.CommonConstants;
 import com.xbh.politemic.common.util.ApiAssert;
 import com.xbh.politemic.common.util.Result;
 import com.xbh.politemic.common.util.ThreadLocalUtil;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,7 +44,7 @@ public class UserController {
     @ApiOperation(value = "用户登录接口")
     @PostMapping("userLogin")
     @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "用户登录", remark = "日志中密码替换")
-    public Result userLogin(UserLoginRequestVO vo) {
+    public Result userLogin(@ApiParam UserLoginRequestVO vo) {
 
         ApiAssert.notNull(vo, "请求参数不能为空!");
 
@@ -62,7 +59,7 @@ public class UserController {
     @ApiOperation(value = "用户注册接口")
     @PostMapping("userRegister")
     @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "用户注册", remark = "只允许普通用户进行注册")
-    public Result userRegister(@RequestBody(required = false) UserRegisterRequestVO vo) {
+    public Result userRegister(@ApiParam @RequestBody(required = false) UserRegisterRequestVO vo) {
 
         ApiAssert.notNull(vo, "请求参数不能为空");
 

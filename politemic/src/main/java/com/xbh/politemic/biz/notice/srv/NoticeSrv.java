@@ -123,7 +123,7 @@ public class NoticeSrv extends BaseNoticeSrv {
         // 筛选条件 状态
         String noticeStatus = vo.getStatus();
         // 筛选条件 类型
-        String noticeType = vo.getType();
+        String noticeType = NoticeTypeEnum.getTyptByStr(vo.getType());
 
         Example example = Example.builder(Notice.class).build();
 
@@ -133,7 +133,7 @@ public class NoticeSrv extends BaseNoticeSrv {
         // 接收方为 userId用户的
         criteria.andEqualTo("toId", userId)
                 // 状态默认未读
-                .andEqualTo("status", NoticeStatusEnum.getStatusByStr(noticeStatus));
+                .andEqualTo("status", NoticeStatusEnum.getNormalStatusByStr(noticeStatus));
         // 类型
         if (StrUtil.equals(NoticeTypeEnum.LETTER.getCode(), noticeType)) {
             // 若为letter 则为私信

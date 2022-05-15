@@ -38,6 +38,16 @@ public class QueueConstant {
     public static final String AUDIT_POST_EXCHANGE_BIND_QUEUE_NAME = "AuditPostQueue";
 
     /**
+     * 帖子审核、评论审核 交换机名
+     */
+    public static final String AUDIT_COMMENT_EXCHANGE_NAME = "AuditComment";
+
+    /**
+     * 帖子审核、评论审核 交换机绑定的队列名
+     */
+    public static final String AUDIT_COMMENT_EXCHANGE_BIND_QUEUE_NAME = "AuditCommentQueue";
+
+    /**
      * 队列消息表中消息id的字段
      */
     public static final String MSG_ID_COLUMN_NAME = "id";

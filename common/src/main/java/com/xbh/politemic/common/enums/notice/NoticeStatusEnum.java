@@ -30,16 +30,18 @@ public enum NoticeStatusEnum {
      * @author: ZBoHang
      * @time: 2021/12/14 13:46
      */
-    public static String getStatusByStr(String str) {
+    public static String getNormalStatusByStr(String str) {
 
         if (StrUtil.isNotBlank(str)) {
 
-            for (NoticeStatusEnum value : NoticeStatusEnum.values()) {
+            if (StrUtil.equals(UNREAD_STATUS.getCode(), str)) {
 
-                if (StrUtil.equals(value.getCode(), str)) {
+                return UNREAD_STATUS.getCode();
+            }
 
-                    return value.getCode();
-                }
+            if (StrUtil.equals(READ_STATUS.getCode(), str)) {
+
+                return READ_STATUS.getCode();
             }
         }
         // 都不满足 则默认未读

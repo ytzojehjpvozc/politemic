@@ -13,6 +13,7 @@ import com.xbh.politemic.common.util.ThreadLocalUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,7 +40,7 @@ public class PostsController {
     @ApiOperation(value = "发布帖子接口")
     @PostMapping("publishPosts")
     @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "发布帖子", remark = "发布完事审核,结果会以系统通知方式传递给用户")
-    public Result publishPosts(PulishPostRequestVO vo) {
+    public Result publishPosts(@ApiParam PulishPostRequestVO vo) {
 
         ApiAssert.noneBlank(vo.getTitle(), "帖子主题不能为空!");
 
@@ -62,7 +63,7 @@ public class PostsController {
     @NoneNeedLogin
     @GetMapping("pageGetPosts")
     @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "分页获取帖子", remark = "有类型、状态、帖子公开性的筛选")
-    public Result pageGetPosts(PageGetPostsRequestVO vo) {
+    public Result pageGetPosts(@ApiParam PageGetPostsRequestVO vo) {
 
         ApiAssert.notNull(vo, "请求参数不能为空!");
 

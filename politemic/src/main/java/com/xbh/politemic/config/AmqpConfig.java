@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -35,14 +36,14 @@ public class AmqpConfig {
         return new Queue(QueueConstant.EMAIL_EXCHANGE_BIND_QUEUE_NAME);
     }
     /**
-     * tail交换机init
+     * email交换机init
      */
     @Bean
     public FanoutExchange initEmailExchange() {
         return ExchangeBuilder.fanoutExchange(QueueConstant.EMAIL_EXCHANGE_NAME).build();
     }
     /**
-     * 队列与交换机的绑定
+     * email队列与交换机的绑定
      */
     @Bean
     public Binding initEmailBind(@Qualifier("initEmailQueue") Queue queue, @Qualifier("initEmailExchange") FanoutExchange exchange) {
@@ -63,7 +64,7 @@ public class AmqpConfig {
         return ExchangeBuilder.fanoutExchange(QueueConstant.TAIL_EXCHANGE_NAME).build();
     }
     /**
-     * 队列与交换机的绑定
+     * tail队列与交换机的绑定
      */
     @Bean
     public Binding initTailBind(@Qualifier("initTailQueue") Queue queue, @Qualifier("initTailExchange") FanoutExchange exchange) {
@@ -86,29 +87,53 @@ public class AmqpConfig {
     /**
      * 帖子审核交换机与队列的bind
      */
-    // @Bean
-    // public Binding initAuditPostBind(@Qualifier("initAuditPostQueue") Queue queue, @Qualifier("initAuditPostExchange") FanoutExchange exchange) {
-    //     return BindingBuilder.bind(queue).to(exchange);
-    // }
+    @Bean
+    public Binding initAuditPostBind(@Qualifier("initAuditPostQueue") Queue queue, @Qualifier("initAuditPostExchange") FanoutExchange exchange) {
+        return BindingBuilder.bind(queue).to(exchange);
+    }
+
+    /**
+     * 评论审核队列init
+     */
+    @Bean
+    public Queue initAuditCommentQueue() {
+        return new Queue(QueueConstant.AUDIT_COMMENT_EXCHANGE_BIND_QUEUE_NAME);
+    }
+    /**
+     * 评论审核交换机init
+     */
+    @Bean
+    public FanoutExchange initAuditCommentExchange() {
+        return ExchangeBuilder.fanoutExchange(QueueConstant.AUDIT_COMMENT_EXCHANGE_NAME).build();
+    }
+    /**
+     * 评论审核交换机与队列的bind
+     */
+    @Bean
+    public Binding initAuditCommentBind(@Qualifier("initAuditCommentQueue") Queue queue, @Qualifier("initAuditCommentExchange") FanoutExchange exchange) {
+        return BindingBuilder.bind(queue).to(exchange);
+    }
+
     /**
      * 定义一个callback
      * @author: ZBoHang
      * @time: 2021/10/15 14:58
      */
     @Bean
+    @Transactional(rollbackFor = Exception.class)
     RabbitTemplate.ConfirmCallback initConfirmCallback() {
         return (correlationData, ack, cause) -> {
             String msgId = Optional.ofNullable(correlationData.getId()).orElse("未找见回执数据");
+            // 构建一个入队状态消息
+            QueueMsg queueMsg = QueueBuilder.buildOnQueueMsg(msgId);
+            // 修改队列消息表中的消息状态
+            this.baseQueueSrv.updateByPrimaryKeySelective(queueMsg);
             // mq未收到消息 消息发送失败
             if (!ack) {
                 log.info("@@@@@消息回调失败");
                 return;
             }
             log.info("@@@@@消息回调,消息发送成功");
-            // 构建一个入队状态消息
-            QueueMsg queueMsg = QueueBuilder.buildOnQueueMsg(msgId);
-            // 修改队列消息表中的消息状态
-            this.baseQueueSrv.updateByPrimaryKeySelective(queueMsg);
         };
     }
 
@@ -145,10 +170,24 @@ public class AmqpConfig {
      * @time: 2021/10/15 15:45
      */
     @Bean
-    public RabbitTemplate auditRabbitTemplate(ConnectionFactory connectionFactory,
+    public RabbitTemplate postRabbitTemplate(ConnectionFactory connectionFactory,
                                               @Qualifier("initConfirmCallback") RabbitTemplate.ConfirmCallback confirmCallback) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setExchange(QueueConstant.AUDIT_POST_EXCHANGE_NAME);
+        rabbitTemplate.setConfirmCallback(confirmCallback);
+        return rabbitTemplate;
+    }
+
+    /**
+     * 评论
+     * @author: ZBoHang
+     * @time: 2021/12/20 14:47
+     */
+    @Bean
+    public RabbitTemplate commentRabbitTemplate(ConnectionFactory connectionFactory,
+                                              @Qualifier("initConfirmCallback") RabbitTemplate.ConfirmCallback confirmCallback) {
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        rabbitTemplate.setExchange(QueueConstant.AUDIT_COMMENT_EXCHANGE_NAME);
         rabbitTemplate.setConfirmCallback(confirmCallback);
         return rabbitTemplate;
     }

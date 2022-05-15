@@ -30,12 +30,14 @@ public enum PostStatusEnum {
 
         if (StrUtil.isNotBlank(str)) {
 
-            for (PostStatusEnum value : values()) {
+            if (StrUtil.equals(NORMAL.getCode(), str)) {
 
-                if (StrUtil.equals(value.getCode(), str)) {
+                return NORMAL.getCode();
+            }
 
-                    return value.getCode();
-                }
+            if (StrUtil.equals(ESSENCE.getCode(), str)) {
+
+                return ESSENCE.getCode();
             }
         }
         // 默认正常状态
