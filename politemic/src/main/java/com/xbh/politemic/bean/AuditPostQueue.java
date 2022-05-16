@@ -129,7 +129,7 @@ public class AuditPostQueue {
      * @author: ZBoHang
      * @time: 2021/10/15 16:21
      */
-    private void customOverModifyMsgStatus(String msgId, String postId, String postAuditStatus, Notice notice) {
+    void customOverModifyMsgStatus(String msgId, String postId, String postAuditStatus, Notice notice) {
         // 保存通知
         this.baseNoticeSrv.insertSelective(notice);
         // 构建一个带有审核状态的讨论帖

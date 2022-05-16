@@ -20,9 +20,9 @@ public class PublishCommentRequestVO implements Serializable {
     private static final long serialVersionUID = -466336274871432356L;
 
     /**
-     * 评论类型 0-对帖子的评论 1-对评论的评论 默认 1-对评论的评论
+     * 评论类型 0-对帖子的评论 1-对评论的评论 默认 0-对帖子的评论
      */
-    @ApiModelProperty("评论类型 0-对帖子的评论 1-对评论的评论 默认 1-对评论的评论")
+    @ApiModelProperty("评论类型 0-对帖子的评论 1-对评论的评论 默认 0-对帖子的评论")
     private String type;
 
     /**

@@ -35,16 +35,12 @@ public class CommentController {
 
         ApiAssert.notNull(vo, "请求参数不能为空");
 
-        ApiAssert.noneBlank(vo.getType(), "未获取到评论的类型!");
-
         ApiAssert.noneBlank(vo.getTargetId(), "未获取到评论的目标!");
 
         ApiAssert.noneBlank(vo.getContent(), "未获取到评论的内容!");
 
         String userId = ThreadLocalUtil.getUserId();
 
-        this.commentSrv.publishComment(vo, userId);
-
-        return Result.success();
+        return Result.success(this.commentSrv.publishComment(vo, userId));
     }
 }

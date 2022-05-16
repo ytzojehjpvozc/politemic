@@ -72,7 +72,7 @@ public class AuditCommentQueue {
      * @time: 2021/10/15 16:15
      */
     public void send(String msgContent, String correlationData) {
-        this.commentRabbitTemplate.convertAndSend(QueueConstant.AUDIT_POST_EXCHANGE_NAME, "auditComment", msgContent, new CorrelationData(correlationData));
+        this.commentRabbitTemplate.convertAndSend(QueueConstant.AUDIT_COMMENT_EXCHANGE_NAME, "", msgContent, new CorrelationData(correlationData));
     }
 
     /**
@@ -102,25 +102,22 @@ public class AuditCommentQueue {
             }
             return;
         }
-        // 审核帖子的主题和内容
+        // 审核评论
         boolean flag = SensitiveWordFilter.isContainsSensitiveWord(content);
-        // 初始化帖子审核完成的通知
+        // 初始化评论审核完成的通知
         Notice notice = NoticeBuilder.buildUnreadStatusNotice(userId);
         // 审核完成则去修改队列消息表中的消息状态 并 修改帖子的审核状态
-        /**
-         * 通知模板
-         */
         String NOTICE_CONTENT = "评论审核完成,审核结果: {}!";
         if (flag) {
             // 若含有敏感词汇
             notice.setContent(StrUtil.format(NOTICE_CONTENT, "未通过"));
             //  1-发表后待审核  2-正常  3-精华帖  4-管理删除、审核未通过的拉黑帖
-            this.customOverModifyMsgStatus(msgId, commentId, CommentStatusEnum.SHIELD.getCode(), notice);
+            this.consumerOverModifyMsgStatus(msgId, commentId, CommentStatusEnum.SHIELD.getCode(), notice);
         } else {
             // 无敏感词汇
             notice.setContent(StrUtil.format(NOTICE_CONTENT, "通过"));
             //  1-发表后待审核  2-正常  3-精华帖  4-管理删除、审核未通过的拉黑帖   同类中未开启事务方法调用事务方法，事务不生效
-            this.customOverModifyMsgStatus(msgId, commentId, CommentStatusEnum.NORMAL.getCode(), notice);
+            this.consumerOverModifyMsgStatus(msgId, commentId, CommentStatusEnum.NORMAL.getCode(), notice);
         }
     }
 
@@ -129,7 +126,7 @@ public class AuditCommentQueue {
      * @author: ZBoHang
      * @time: 2021/10/15 16:21
      */
-    void customOverModifyMsgStatus(String msgId, String commentId, String commentAuditStatus, Notice notice) {
+    void consumerOverModifyMsgStatus(String msgId, String commentId, String commentAuditStatus, Notice notice) {
         // 保存通知
         this.baseNoticeSrv.insertSelective(notice);
         // 构建一个带有审核状态的评论
@@ -148,7 +145,7 @@ public class AuditCommentQueue {
      * @time: 2021/10/19 15:34
      */
     @Transactional(rollbackFor = Exception.class)
-    public void createAuditPostMsg(Comment comment) {
+    public void createAuditCommentMsg(Comment comment) {
         Map<String, String> map = new HashMap<>(7);
         String msgId = StrKit.getUUID();
 

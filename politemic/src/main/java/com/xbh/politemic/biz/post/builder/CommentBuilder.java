@@ -14,6 +14,15 @@ import com.xbh.politemic.common.util.StrKit;
  */
 public class CommentBuilder {
 
+    /**
+     * 构建一个初始状态的评论
+     * @param vo vo
+     * @param userId 用户id
+     * @param type 类型
+     * @return: com.xbh.politemic.biz.post.domain.Comment
+     * @author: ZBoHang
+     * @time: 2021/12/20 17:08
+     */
     public static Comment buildInitComment(PublishCommentRequestVO vo, String userId, String type) {
 
         Comment comment = null;

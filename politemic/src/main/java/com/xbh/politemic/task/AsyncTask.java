@@ -1,5 +1,6 @@
 package com.xbh.politemic.task;
 
+import com.xbh.politemic.bean.AuditCommentQueue;
 import com.xbh.politemic.bean.AuditPostQueue;
 import com.xbh.politemic.bean.MailMsgQueue;
 import com.xbh.politemic.bean.TakeTailQueue;
@@ -27,6 +28,8 @@ public class AsyncTask {
     private TakeTailQueue takeTailQueue;
     @Autowired
     private AuditPostQueue auditPostQueue;
+    @Autowired
+    private AuditCommentQueue auditCommentQueue;
 
     /**
      * 新建激活邮件消息并发送
@@ -90,6 +93,6 @@ public class AsyncTask {
 
     @Async("CustomAsyncThreadPoolExecutor")
     public void auditComment(Comment comment) {
-
+        this.auditCommentQueue.createAuditCommentMsg(comment);
     }
 }
