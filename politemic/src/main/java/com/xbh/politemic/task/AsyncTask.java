@@ -91,8 +91,27 @@ public class AsyncTask {
         list.forEach(queueMsg -> this.auditPostQueue.send(queueMsg.getMsgContent(), queueMsg.getMsgCorrelationData()));
     }
 
+    /**
+     * 评论异步审核
+     * @param comment 评论
+     * @return: void
+     * @author: ZBoHang
+     * @time: 2021/12/21 9:23
+     */
     @Async("CustomAsyncThreadPoolExecutor")
     public void auditComment(Comment comment) {
         this.auditCommentQueue.createAuditCommentMsg(comment);
+    }
+
+    /**
+     * 评论异步审核 循环审核多个
+     * @param list 多个异常消息
+     * @return: void
+     * @author: ZBoHang
+     * @time: 2021/12/21 9:29
+     */
+    @Async("CustomAsyncThreadPoolExecutor")
+    public void auditComments(List<QueueMsg> list) {
+        list.forEach(queueMsg -> this.auditCommentQueue.send(queueMsg.getMsgContent(), queueMsg.getMsgCorrelationData()));
     }
 }
