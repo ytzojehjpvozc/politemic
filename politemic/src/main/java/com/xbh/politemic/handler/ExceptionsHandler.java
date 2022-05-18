@@ -55,13 +55,20 @@ public class ExceptionsHandler {
      * @date: 2021/10/3 11:38
      */
     private String getTrace(Exception ex) {
+        // 堆栈跟踪中的元素
         StackTraceElement[] stackTrace = ex.getStackTrace();
+
         StringBuilder sb = new StringBuilder();
+
         sb.append(ex).append("\n");
+
         for (StackTraceElement el : stackTrace) {
+            // 循环内部 使用StringBuilder
             sb.append(MessageFormat.format("\tat {0}.{1}({2}:{3})\n",
+
                     el.getClassName(), el.getMethodName(), el.getFileName(), el.getLineNumber()));
         }
+
         return sb.toString();
     }
 }

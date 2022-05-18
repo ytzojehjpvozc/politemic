@@ -15,6 +15,14 @@
 
 ![](C:\Users\admin\Downloads\politemic_doc\用户登录模块.png)
 
+###### 3.用户激活流程
+
+![用户激活模块](C:\Users\admin\Downloads\politemic_doc\用户激活模块.png)
+
+###### 4.用户信息获取流程
+
+![用户信息获取模块](C:\Users\admin\Downloads\politemic_doc\用户信息获取模块.png)
+
 
 
 

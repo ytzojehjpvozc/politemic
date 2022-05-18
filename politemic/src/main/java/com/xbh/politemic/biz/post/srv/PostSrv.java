@@ -23,7 +23,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -36,15 +39,12 @@ public class PostSrv extends BasePostSrv {
 
     private static final Logger log = LoggerFactory.getLogger(PostSrv.class);
 
-    /**
-     * 创建帖子初始类型 1-普通帖子
-     */
-    private final String CREATE_POST_INIT_TYPE = "1";
-
     @Autowired
     private AsyncTask asyncTask;
     @Autowired
     private UserSrv userSrv;
+    @Autowired
+    private CommentSrv commentSrv;
     @Resource
     private LoadingCache<String, List<DiscussPosts>> postsListCaffeine;
 
@@ -113,7 +113,7 @@ public class PostSrv extends BasePostSrv {
      * @author: ZBoHang
      * @time: 2021/12/15 17:39
      */
-    public GetPostDetailResponseVO getPostDetail(String postId, String token) {
+    public Map<String, Object> getPostDetail(String postId, String token) {
         // 查询帖子
         DiscussPosts dp = this.selectByPrimaryKey(postId);
 
@@ -125,14 +125,21 @@ public class PostSrv extends BasePostSrv {
         // 帖子如果是私密的
         if (StrUtil.equals(PostConfessionEnum.PRIVACY.getCode(), dp.getConfessed())) {
 
-            ServiceAssert.isTrue(StrUtil.isNotBlank(token), "未登录不能查询该帖子!");
-
             String userId = this.userSrv.getUserInfo(token).getId();
 
             ServiceAssert.isTrue(userId.equals(dp.getUserId()), "没有权限查看该帖子!");
         }
 
-        return GetPostDetailResponseVO.build(dp);
+        GetPostDetailResponseVO vo = GetPostDetailResponseVO.build(dp);
+
+        List<Map<String, Object>> commentList = this.commentSrv.getCommentsByPostId(vo.getId());
+
+        return Collections.unmodifiableMap(new HashMap<String, Object>() {
+            {
+                put("body", vo);
+                put("comment", commentList);
+            }
+        });
     }
 
     /**

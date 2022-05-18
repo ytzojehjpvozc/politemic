@@ -56,8 +56,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     /**
      * 配置消息转换器-- 使用 fastjson
-     * @param null
-     * @return:
      * @author: ZBoHang
      * @time: 2021/12/15 15:17
      */
