@@ -9,23 +9,23 @@
 
 ###### 1.用户注册流程
 
-![](C:\Users\admin\Downloads\politemic_doc\用户注册流程.png)
+![](https://gitee.com/zheng-bohang/politemic/blob/master/common/src/main/img/用户注册流程.png)
 
 ###### 2.用户登录流程
 
-![](C:\Users\admin\Downloads\politemic_doc\用户登录流程.png)
+![](https://gitee.com/zheng-bohang/politemic/blob/master/common/src/main/img/用户登录流程.png)
 
 ###### 3.用户激活流程
 
-![用户激活模块](C:\Users\admin\Downloads\politemic_doc\用户激活流程.png)
+![用户激活模块](https://gitee.com/zheng-bohang/politemic/blob/master/common/src/main/img/用户激活流程.png)
 
 ###### 4.用户信息获取流程
 
-![用户信息获取模块](C:\Users\admin\Downloads\politemic_doc\用户信息获取流程.png)
+![用户信息获取模块](https://gitee.com/zheng-bohang/politemic/blob/master/common/src/main/img/用户信息获取流程.png)
 
 ###### 5.未读(私信/通知)个数获取流程
 
-![私信_通知未读个数获取流程](C:\Users\admin\Downloads\politemic_doc\私信_通知未读个数获取流程.png)
+![私信_通知未读个数获取流程](https://gitee.com/zheng-bohang/politemic/blob/master/common/src/main/img/私信_通知未读个数获取流程.png)
 
 
 
