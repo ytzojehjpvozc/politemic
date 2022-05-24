@@ -9,7 +9,7 @@
 
 ###### 1.用户注册流程
 
-![](<img src="https://gitee.com/zheng-bohang/politemic/blob/master/common/src/main/img/用户注册流程.png">)
+![](<img src="https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/用户注册流程.png">)
 
 ###### 2.用户登录流程
 
