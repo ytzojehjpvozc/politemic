@@ -9,23 +9,23 @@
 
 ###### 1.用户注册流程
 
-![](<img src="https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/用户注册流程.png">)
+![](<img src="https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/userRegister.png">)
 
 ###### 2.用户登录流程
 
-![](https://gitee.com/zheng-bohang/politemic/blob/master/common/src/main/img/用户登录流程.png)
+![](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/userLogin.png)
 
 ###### 3.用户激活流程
 
-![用户激活模块](https://gitee.com/zheng-bohang/politemic/blob/master/common/src/main/img/用户激活流程.png)
+![用户激活模块](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/userActivate.png)
 
 ###### 4.用户信息获取流程
 
-![用户信息获取模块](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/%E7%94%A8%E6%88%B7%E4%BF%A1%E6%81%AF%E8%8E%B7%E5%8F%96%E6%B5%81%E7%A8%8B.png)
+![用户信息获取模块](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/getUserInfo.png)
 
 ###### 5.未读(私信/通知)个数获取流程
 
-![私信_通知未读个数获取流程](https://gitee.com/zheng-bohang/politemic/blob/master/common/src/main/img/私信_通知未读个数获取流程.png)
+![私信_通知未读个数获取流程](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/getUnReadNoticeCnt.png)
 
 
 
