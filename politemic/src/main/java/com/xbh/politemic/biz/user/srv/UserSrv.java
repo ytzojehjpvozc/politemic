@@ -14,10 +14,13 @@ import com.xbh.politemic.biz.user.builder.UserBuilder;
 import com.xbh.politemic.biz.user.domain.SysUser;
 import com.xbh.politemic.biz.user.domain.UserToken;
 import com.xbh.politemic.biz.user.vo.GetUserInfoResponseVO;
+import com.xbh.politemic.biz.user.vo.ModifyUserInfoRequestVO;
 import com.xbh.politemic.biz.user.vo.UserLoginRequestVO;
 import com.xbh.politemic.biz.user.vo.UserRegisterRequestVO;
 import com.xbh.politemic.common.constant.UserConstant;
 import com.xbh.politemic.common.enums.user.UserStatusEnum;
+import com.xbh.politemic.common.enums.user.UserTailStatusEnum;
+import com.xbh.politemic.common.util.SensitiveWordFilter;
 import com.xbh.politemic.common.util.ServiceAssert;
 import com.xbh.politemic.common.util.StrKit;
 import com.xbh.politemic.task.AsyncTask;
@@ -39,19 +42,13 @@ import java.util.Map;
 public class UserSrv extends BaseUserSrv {
 
     /**
-     * 实体类属性名
-     */
-    private final String COLUMN_NAME_USERNAME = "userName";
-
-    private final String COLUMN_NAME_EMAIL = "email";
-    /**
      * 用户默认头像前缀 感谢https://github.com/multiavatar/multiavatar-php提供的接口
      */
-    private final String HEADER_URL_KEY_IN_ENV = "https://api.multiavatar.com/{}.svg";
+    // "https://api.multiavatar.com/{}.svg";
     /**
      * 用户默认评论尾巴 感谢https://github.com/xenv/gushici提供的接口
      */
-    private final String TAIL_URL_KEY_IN_ENV = "https://v1.jinrishici.com/all.json";
+     // "https://v1.jinrishici.com/all.json";
 
     @Autowired
     private BaseUserTokenSrv baseUserTokenSrv;
@@ -158,6 +155,95 @@ public class UserSrv extends BaseUserSrv {
     }
 
     /**
+     * 解绑邮箱
+     * @param userPass 用户密码
+     * @param token 用户令牌
+     * @return: void
+     * @author: ZBoHang
+     * @time: 2021/12/23 9:21
+     */
+    public String unBindMailBox(String userPass, String token) {
+        // 获取用户信息
+        SysUser sysUser = this.getUserInfoByToken(token);
+        // 验证用户状态
+        ServiceAssert.isFalse(StrUtil.equals(UserStatusEnum.INACTIVATED.getCode(), sysUser.getStatus()), "用户处于未激活状态,不能进行解绑操作!");
+
+        ServiceAssert.isTrue(StrUtil.isNotBlank(sysUser.getEmail()), "用户邮箱已解绑!");
+
+        String s = StrKit.MD5Code(userPass + sysUser.getSalt());
+        // 验证密码
+        ServiceAssert.isTrue(StrUtil.equals(sysUser.getUserPass(), s), "用户密码错误!");
+        // 解绑
+        this.updateByPrimaryKey(sysUser.setEmail(null));
+        // 清除缓存中的数据
+        this.redisClient.del(UserConstant.USER_TOKEN_PRE + token);
+
+        return "邮箱解绑成功!";
+    }
+
+    /**
+     * 修改用户信息
+     * @param token 用户令牌
+     * @param vo
+     *         oldUserPass 旧密码
+     *         newUserPass 新密码
+     *         email 邮箱
+     *         tail 评论尾巴
+     *         tailStatus 尾巴开启状态 Y-开启 N-关闭 默认关闭
+     * @return: void
+     * @author: ZBoHang
+     * @time: 2021/12/23 10:20
+     */
+    public String modifyUserInfo(String token, ModifyUserInfoRequestVO vo) {
+
+        SysUser sysUser = this.getUserInfoByToken(token);
+        // 密码
+        String userPass = vo.getNewUserPass();
+
+        if (StrUtil.isNotBlank(userPass)) {
+
+            ServiceAssert.isTrue(StrUtil.equals(sysUser.getUserPass(), StrKit.MD5Code(vo.getOldUserPass() + sysUser.getSalt())), "旧密码错误!");
+
+            ServiceAssert.isFalse(StrUtil.containsBlank(userPass), "密码中不能有空白!");
+
+            sysUser.setUserPass(userPass);
+        }
+        // 邮箱
+        String email = vo.getEmail();
+
+        if (StrUtil.isNotBlank(email)) {
+
+            ServiceAssert.isTrue(ReUtil.isMatch(RegexPool.EMAIL, vo.getEmail()), "邮箱格式不正确!");
+
+            ServiceAssert.isFalse(this.checkEmailOrUserNameInDB(null, email), "该邮箱已被绑定!");
+
+            sysUser.setEmail(email);
+        }
+        // 评论尾巴
+        String tail = vo.getTail();
+
+        if (StrUtil.isNotBlank(tail)) {
+
+            ServiceAssert.isFalse(SensitiveWordFilter.isContainsSensitiveWord(tail), "评论尾巴中含有敏感词!");
+
+            sysUser.setTail(tail);
+        }
+        // 评论尾巴状态 Y-开启 N-关闭
+        String tailStatus = vo.getTailStatus();
+
+        if (StrUtil.isNotBlank(tailStatus)) {
+
+            sysUser.setTailStatus(UserTailStatusEnum.getTailStatusByStr(tailStatus));
+        }
+
+        ServiceAssert.isFalse(StrUtil.isAllBlank(userPass, email, tail, tailStatus), "未获取到要修改的数据!");
+
+        this.updateByPrimaryKey(sysUser);
+
+        return "修改成功!";
+    }
+
+    /**
      * 通过令牌获取用户 源 信息 只能获取token对应的用户信息
      * @param token 用户令牌
      * @return: com.xbh.politemic.biz.user.domain.SysUser
@@ -207,9 +293,14 @@ public class UserSrv extends BaseUserSrv {
 
         Example.Criteria criteria = example.createCriteria();
         // 用户名或者邮箱都不能重复
-        criteria.orEqualTo("userName", userName)
+        if (StrUtil.isNotBlank(userName)) {
 
-                .orEqualTo("email", email);
+            criteria.orEqualTo("userName", userName);
+        }
+        if (StrUtil.isNotBlank(email)) {
+
+            criteria.orEqualTo("email", email);
+        }
         // 包含返回 true
         if (this.selectCountByExample(example) > 0) {
 

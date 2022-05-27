@@ -33,7 +33,7 @@
 #### 安装教程
 
 1.  JDK1.8、idea
-2.  安装redis、rabbitMQ3.9.5(erl 23.2)、redis3.2、mysql8.0.2
+2.  安装rabbitMQ3.9.5(erl 23.2)、redis3.2、mysql8.0.2
 3.  sql文件在[common/src/main/schemas/politemic.sql]
 
 #### 使用说明

@@ -1,6 +1,7 @@
 package com.xbh.politemic.biz.user.controller;
 
 import com.xbh.politemic.biz.user.srv.UserSrv;
+import com.xbh.politemic.biz.user.vo.ModifyUserInfoRequestVO;
 import com.xbh.politemic.biz.user.vo.UserLoginRequestVO;
 import com.xbh.politemic.biz.user.vo.UserRegisterRequestVO;
 import com.xbh.politemic.common.annotation.NoneNeedLogin;
@@ -100,6 +101,35 @@ public class UserController {
         ApiAssert.noneBlank(token, "未登录不能获取用户信息!");
 
         return Result.success(this.userSrv.getUserInfo(token));
+    }
+
+    @ApiOperation("解除邮箱绑定")
+    @ApiImplicitParams(
+            {
+                    @ApiImplicitParam(name = "userPass", value = "用户密码", required = false)
+            }
+    )
+    @PostMapping("unBindMailBox")
+    @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "解除邮箱绑定", remark = "解除邮箱绑定,重复解绑会报错")
+    public Result unBindMailBox(String userPass) {
+
+        ApiAssert.noneBlank(userPass, "解绑时密码不能为空!");
+
+        String token = ThreadLocalUtil.getToken();
+
+        return Result.success(this.userSrv.unBindMailBox(userPass, token));
+    }
+
+    @ApiOperation("修改用户信息")
+    @PostMapping("modifyUserInfo")
+    @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "修改用户信息", remark = "修改用户信息 密码、头像、尾巴、尾巴状态")
+    public Result modifyUserInfo(@RequestBody(required = false) ModifyUserInfoRequestVO vo) {
+
+        ApiAssert.notNull(vo, "请求参数不能为空!");
+
+        String token = ThreadLocalUtil.getToken();
+
+        return Result.success(this.userSrv.modifyUserInfo(token, vo));
     }
 
 }

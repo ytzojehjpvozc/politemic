@@ -6,10 +6,10 @@ import cn.hutool.extra.spring.SpringUtil;
 import com.xbh.politemic.biz.user.domain.SysUser;
 import com.xbh.politemic.biz.user.domain.UserToken;
 import com.xbh.politemic.biz.user.vo.UserRegisterRequestVO;
-import com.xbh.politemic.common.constant.CommonConstants;
 import com.xbh.politemic.common.constant.UserConstant;
 import com.xbh.politemic.common.enums.user.UserAuthFieldLevelEnum;
 import com.xbh.politemic.common.enums.user.UserStatusEnum;
+import com.xbh.politemic.common.enums.user.UserTailStatusEnum;
 import com.xbh.politemic.common.util.StrKit;
 import org.springframework.core.env.Environment;
 
@@ -87,7 +87,7 @@ public class UserBuilder {
                     // 用户默认头像前缀 感谢https://github.com/multiavatar/multiavatar-php的接口
                     .setHeaderUrl(StrUtil.format(headerUrl, id))
                     // 尾巴开启状态 Y-开启 N-关闭 默认关闭
-                    .setTailStatus(CommonConstants.STATUS_N);
+                    .setTailStatus(UserTailStatusEnum.TURN_OFF.getCode());
         }
         return sysUser;
     }
