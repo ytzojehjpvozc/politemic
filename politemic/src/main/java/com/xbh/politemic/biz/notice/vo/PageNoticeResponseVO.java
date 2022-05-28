@@ -1,16 +1,14 @@
 package com.xbh.politemic.biz.notice.vo;
 
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.xbh.politemic.biz.notice.domain.Notice;
 import com.xbh.politemic.biz.user.srv.UserSrv;
+import com.xbh.politemic.common.constant.NoticeConstant;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @PageNoticeResponseVO: 分页获取 私信/通知 响应 VO
@@ -40,70 +38,55 @@ public class PageNoticeResponseVO implements Serializable {
 
     /**
      * 构建系统通知列表
-     * @param noticeList 通知列表
-     * @param fromName 来源方名称
+     * @param notice 通知
      * @return: java.util.List<com.xbh.politemic.biz.notice.vo.PageNoticeResponseVO>
      * @author: ZBoHang
      * @time: 2021/12/14 14:46
      */
-    public static List<PageNoticeResponseVO> buildSystemNotice(List<Notice> noticeList, String fromName) {
+    public static PageNoticeResponseVO buildSystemNotice(Notice notice) {
 
-        List<PageNoticeResponseVO> voList = null;
+        PageNoticeResponseVO vo = null;
 
-        if (noticeList != null && !noticeList.isEmpty() && StrUtil.isNotBlank(fromName)) {
+        if (notice != null) {
 
-            voList = new ArrayList<>(noticeList.size());
-
-            for (Notice notice : noticeList) {
-                // 每次都需要创建对象
-                PageNoticeResponseVO vo = new PageNoticeResponseVO();
-                // id
-                vo.setNoticeId(notice.getId())
-                        // 来源方名称
-                        .setFromName(fromName)
-                        // 时间
-                        .setTime(notice.getTime());
-
-                voList.add(vo);
-            }
+            vo = new PageNoticeResponseVO()
+                    // id
+                    .setNoticeId(notice.getId())
+                    // 来源方名称
+                    .setFromName(NoticeConstant.SYSTEM_NOTICE_FROM_NAME)
+                    // 时间
+                    .setTime(notice.getTime());
         }
 
-        return voList;
+        return vo;
     }
 
     /**
-     * 构建私信列表
-     * @param noticeList 私信列表
+     * 构建私信
+     * @param notice 私信
      * @return: java.util.List<com.xbh.politemic.biz.notice.vo.PageNoticeResponseVO>
      * @author: ZBoHang
      * @time: 2021/12/14 15:19
      */
-    public static List<PageNoticeResponseVO> buildUserLetter(List<Notice> noticeList) {
+    public static PageNoticeResponseVO buildUserLetter(Notice notice) {
 
-        List<PageNoticeResponseVO> voList = null;
+        PageNoticeResponseVO vo = null;
 
-        if (noticeList != null && !noticeList.isEmpty()) {
+        if (notice != null) {
 
-            voList = new ArrayList<>(noticeList.size());
+            vo = new PageNoticeResponseVO();
 
             UserSrv userSrv = SpringUtil.getBean(UserSrv.class);
-
-            for (Notice notice : noticeList) {
-                // 每次都需要创建对象
-                PageNoticeResponseVO vo = new PageNoticeResponseVO();
-                // 获取私信来源方 名称
-                String userName = userSrv.selectByPrimaryKey(notice.getFromId()).getUserName();
-                // id
-                vo.setNoticeId(notice.getId())
-                        // 来源方名称
-                        .setFromName(userName)
-                        // 时间
-                        .setTime(notice.getTime());
-
-                voList.add(vo);
-            }
+            // 获取私信来源方 名称
+            String userName = userSrv.selectByPrimaryKey(notice.getFromId()).getUserName();
+            // id
+            vo.setNoticeId(notice.getId())
+                    // 来源方名称
+                    .setFromName(userName)
+                    // 时间
+                    .setTime(notice.getTime());
         }
 
-        return voList;
+        return vo;
     }
 }

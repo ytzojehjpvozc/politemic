@@ -15,6 +15,7 @@
     <description>politemic 公共包</description>
     <properties>
         <java.version>1.8</java.version>
+        <elasticsearch.version>7.15.1</elasticsearch.version>
     </properties>
     <dependencies>
         <dependency>

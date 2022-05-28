@@ -1,5 +1,6 @@
 package com.xbh.politemic.common.config;
 
+import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -65,7 +66,12 @@ public class Knife4jConfig {
             @Override
             public Boolean apply(Class<?> input) {
                 String packageName = ClassUtils.getPackageName(input);
-                log.info("knife4j扫描 -->>> " + input.getSimpleName());
+
+                if (!StrUtil.equals("BasicErrorController", input.getSimpleName())) {
+
+                    log.info("knife4j扫描 -->>> " + input.getSimpleName());
+                }
+
                 return packageName.startsWith(basePackage);
             }
         };

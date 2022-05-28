@@ -35,6 +35,10 @@ spring:
     port: 6379
     password: 123456
     timeout: 10000
+elasticsearch:
+  scheme: elasticsearch
+  host: 127.0.0.1
+  port: 9200
 
 # logback日志配置文件
 logging:

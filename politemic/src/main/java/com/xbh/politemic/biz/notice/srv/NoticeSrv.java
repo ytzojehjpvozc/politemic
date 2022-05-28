@@ -20,6 +20,7 @@ import tk.mybatis.mapper.entity.Example;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @NoticeSrv: 通知 srv
@@ -151,10 +152,10 @@ public class NoticeSrv extends BaseNoticeSrv {
         // 再次判断是私信还是通知
         if (StrUtil.equals(NoticeTypeEnum.LETTER.getCode(), noticeType)) {
             // 构建私信列表
-            voList = PageNoticeResponseVO.buildUserLetter(noticeList);
+            voList = noticeList.stream().map(PageNoticeResponseVO::buildUserLetter).collect(Collectors.toList());
         } else {
             // 构建系统通知列表
-            voList = PageNoticeResponseVO.buildSystemNotice(noticeList, NoticeConstant.SYSTEM_NOTICE_FROM_NAME);
+            voList = noticeList.stream().map(PageNoticeResponseVO::buildSystemNotice).collect(Collectors.toList());
         }
         // 返回page
         return new PageUtil<>(pageNum, pageSize, count.longValue(), voList);
