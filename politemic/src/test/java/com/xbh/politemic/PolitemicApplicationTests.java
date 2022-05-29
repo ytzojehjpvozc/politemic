@@ -1,6 +1,6 @@
 package com.xbh.politemic;
 
-import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.xbh.politemic.bean.ESClient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -8,8 +8,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class PolitemicApplicationTests {
 
+    // @Autowired
+    // LoadingCache<String, String> loadingCache;
     @Autowired
-    LoadingCache<String, String> loadingCache;
+    private ESClient esClient;
 
     @Test
     void contextLoads() throws Exception {
@@ -27,7 +29,6 @@ class PolitemicApplicationTests {
         // criteria.andEqualTo("id", "58fd6cbeda614c67a14f83a6d0fff4b4");
         // SysUser sysUser = sysUserMapper.selectOneByExample(example);
         // String tail = sysUser.getTail();
-        // JSONObject jsonObject = JSONObject.parseObject(tail);
         // System.out.println(jsonObject.getString("content"));
         // loadingCache.put("abc", "cba");
         // String abc = loadingCache.get("abc");
@@ -39,6 +40,17 @@ class PolitemicApplicationTests {
         // long l = stats.hitCount();
         // double v = stats.hitRate();
 
+        // 测试es
+        // 创建索引
+        // this.esClient.createIndex("test123");
+        // 删除索引
+        // this.esClient.deleteIndex("test123");
+        // 创建文档
+        // this.esClient.createDocument(new ExceptionLog()
+        //                 .setId(7)
+        //         , "test123");
+        //
+        // this.esClient.getDocument("test123", "1");
 
     }
 

@@ -37,7 +37,7 @@ public class PostsController {
      * @author: ZBoHang
      * @time: 2021/12/15 16:53
      */
-    @ApiOperation(value = "发布帖子接口")
+    @ApiOperation(value = "发布帖子")
     @PostMapping("publishPosts")
     @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "发布帖子", remark = "发布完事审核,结果会以系统通知方式传递给用户")
     public Result publishPosts(@ApiParam PulishPostRequestVO vo) {

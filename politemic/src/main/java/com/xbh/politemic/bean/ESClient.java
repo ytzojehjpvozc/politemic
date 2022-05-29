@@ -1,5 +1,6 @@
 package com.xbh.politemic.bean;
 
+import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -21,7 +22,7 @@ import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.query.MatchAllQueryBuilder;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
@@ -61,10 +62,8 @@ public class ESClient {
                 CreateIndexResponse response = this.restHighLevelClient.indices().create(new CreateIndexRequest(index), RequestOptions.DEFAULT);
 
                 log.info("index: " + index + " create result -->>> " + response.isAcknowledged());
+
             }
-
-            log.error("index: " + index + " -->>> is existed!");
-
         } catch (IOException e) {
 
             log.error("create es index error!");
@@ -83,16 +82,14 @@ public class ESClient {
         try {
             boolean flag = this.restHighLevelClient.indices().exists(new GetIndexRequest(index), RequestOptions.DEFAULT);
 
-            log.info("index: " + index + " -->>> " + flag);
-
-            return Boolean.TRUE;
+            return flag;
 
         } catch (IOException e) {
 
             log.error("find es index isExist error!");
         }
 
-        return Boolean.FALSE;
+        return Boolean.TRUE;
     }
 
     /**
@@ -132,7 +129,7 @@ public class ESClient {
 
                 .timeout(TimeValue.timeValueSeconds(3000))
 
-                .source(entity);
+                .source(JSONUtil.toJsonStr(entity), XContentType.JSON);
 
         try {
             IndexResponse response = this.restHighLevelClient.index(request, RequestOptions.DEFAULT);
@@ -143,31 +140,6 @@ public class ESClient {
 
             log.error("create document error!");
         }
-    }
-
-    /**
-     * 判断 document是否存在 true-存在 false-不存在
-     * @param index 索引
-     * @param id id
-     * @return: boolean
-     * @author: ZBoHang
-     * @time: 2021/12/23 17:58
-     */
-    public boolean isExistDocument(String index, String id) {
-
-        try {
-            boolean flag = this.restHighLevelClient.exists(new GetRequest(index, id), RequestOptions.DEFAULT);
-
-            log.info("document isExist -->>> " + flag);
-
-            return flag;
-
-        } catch (IOException e) {
-
-            log.error("find es document isExist error!");
-        }
-
-        return Boolean.FALSE;
     }
 
     /**
@@ -301,7 +273,7 @@ public class ESClient {
         // 设置条件
         searchSourceBuilder.query(termQueryBuilder);
         // 设置请求
-        SearchRequest request = new SearchRequest().source(searchSourceBuilder);
+        SearchRequest request = new SearchRequest(index).source(searchSourceBuilder);
         // 分页 默认 1-10
         // searchSourceBuilder.from(0).size(10);
 
@@ -323,41 +295,4 @@ public class ESClient {
         return null;
     }
 
-    /**
-     * 查询所有
-     * @return: org.elasticsearch.search.SearchHit[]
-     * @author: ZBoHang
-     * @time: 2021/12/24 11:17
-     */
-    public SearchHit[] allSearch() {
-        // 条件构造
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().timeout(TimeValue.MINUS_ONE);
-        // 构建高亮
-        searchSourceBuilder.highlighter(new HighlightBuilder());
-        // 精确查询
-        MatchAllQueryBuilder matchAllQueryBuilder = QueryBuilders.matchAllQuery();
-        // 设置条件
-        searchSourceBuilder.query(matchAllQueryBuilder);
-        // 设置请求
-        SearchRequest request = new SearchRequest().source(searchSourceBuilder);
-        // 分页 默认 1-10
-        // searchSourceBuilder.from(0).size(10);
-
-        try {
-            // 发送请求
-            SearchResponse response = this.restHighLevelClient.search(request, RequestOptions.DEFAULT);
-
-            SearchHit[] hits = response.getHits().getHits();
-
-            Arrays.stream(hits).forEach(documentFields -> log.info("es termQuery result -->>> " + documentFields.getSourceAsString()));
-
-            return hits;
-
-        } catch (IOException e) {
-
-            log.error("es termQuery error!");
-        }
-
-        return null;
-    }
 }

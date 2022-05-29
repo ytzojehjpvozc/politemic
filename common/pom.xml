@@ -15,7 +15,7 @@
     <description>politemic 公共包</description>
     <properties>
         <java.version>1.8</java.version>
-        <elasticsearch.version>7.15.1</elasticsearch.version>
+<!--        <elasticsearch.version>7.15.1</elasticsearch.version>-->
     </properties>
     <dependencies>
         <dependency>
@@ -106,8 +106,13 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>7.15.1</version>
         </dependency>
 
         <dependency>

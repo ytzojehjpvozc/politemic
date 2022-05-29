@@ -5,7 +5,6 @@ import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,11 +15,9 @@ import org.springframework.context.annotation.Configuration;
  */
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "elasticsearch")
 public class ElasticSearchConfig {
 
-    @Value("${elasticsearch.scheme}")
-    private String scheme;
+    private static String schema = "http"; // 使用的协议
 
     @Value("${elasticsearch.host}")
     private String host;
@@ -37,7 +34,7 @@ public class ElasticSearchConfig {
     @Bean
     public RestHighLevelClient restHighLevelClient() {
 
-        return new RestHighLevelClient(RestClient.builder(new HttpHost(this.host, this.port, this.scheme)));
+        return new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, schema)));
     }
 
 }
