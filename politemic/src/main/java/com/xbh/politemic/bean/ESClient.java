@@ -122,6 +122,11 @@ public class ESClient {
      * @time: 2021/12/23 17:39
      */
     public void createDocument(Object entity, String index, String id) {
+        // 索引不存在时创建
+        if (!this.isExistIndex(index)) {
+
+            this.createIndex(index);
+        }
 
         IndexRequest request = new IndexRequest(index)
 

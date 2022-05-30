@@ -118,4 +118,30 @@ public class PostBuilder {
 
         return discussPosts;
     }
+
+    /**
+     * 构建一个es文档对象
+     * @param title 帖子主题
+     * @param content 帖子内容
+     * @return: com.xbh.politemic.biz.post.domain.DiscussPosts
+     * @author: ZBoHang
+     * @time: 2021/12/28 16:27
+     */
+    public static DiscussPosts buildESBO(String title, String content) {
+
+        DiscussPosts bo = null;
+
+        if (StrUtil.isAllNotBlank(title, content)) {
+
+            bo = new DiscussPosts()
+
+                    .setTitle(title)
+
+                    .setContent(content)
+
+                    .setCreateTime(DateUtil.date());
+        }
+
+        return bo;
+    }
 }

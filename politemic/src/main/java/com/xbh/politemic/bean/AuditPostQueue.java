@@ -13,6 +13,7 @@ import com.xbh.politemic.biz.post.srv.BasePostSrv;
 import com.xbh.politemic.biz.queue.builder.QueueBuilder;
 import com.xbh.politemic.biz.queue.domain.QueueMsg;
 import com.xbh.politemic.biz.queue.srv.BaseQueueSrv;
+import com.xbh.politemic.common.constant.CommonConstants;
 import com.xbh.politemic.common.constant.QueueConstant;
 import com.xbh.politemic.common.enums.post.PostStatusEnum;
 import com.xbh.politemic.common.enums.queue.QueueMsgTypeEnum;
@@ -67,6 +68,8 @@ public class AuditPostQueue {
     private BasePostSrv basePostSrv;
     @Autowired
     private BaseNoticeSrv baseNoticeSrv;
+    @Autowired
+    private ESClient esClient;
 
     /**
      * 发送审核消息
@@ -119,6 +122,8 @@ public class AuditPostQueue {
         } else {
             // 无敏感词汇
             notice.setContent(StrUtil.format(noticeContentTemplate, "通过"));
+            // 向es中添加文档
+            this.esClient.createDocument(PostBuilder.buildESBO(title, content), CommonConstants.ES_POST_INDEX_NAME, postId);
             //  1-发表后待审核  2-正常  3-精华帖  4-管理删除、审核未通过的拉黑帖   同类中未开启事务方法调用事务方法，事务不生效
             this.customOverModifyMsgStatus(msgId, postId, PostStatusEnum.NORMAL.getCode(), notice);
         }

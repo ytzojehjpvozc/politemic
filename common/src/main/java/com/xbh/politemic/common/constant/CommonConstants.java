@@ -72,4 +72,6 @@ public class CommonConstants {
      */
     public static final String CAFFEINE_CONFIG_PAGE_GET_POSTS_PRE = "Caffeine_pageGetPosts_";
 
+    public static final String ES_POST_INDEX_NAME = "posts_index";
+
 }
