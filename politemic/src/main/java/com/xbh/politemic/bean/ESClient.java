@@ -23,11 +23,15 @@ import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.ScoreSortBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -186,7 +190,7 @@ public class ESClient {
     public void updateDocument(Object entity, String index, String id) {
 
         try {
-            UpdateResponse response = this.restHighLevelClient.update(new UpdateRequest(index, id).doc(entity).timeout(TimeValue.MINUS_ONE), RequestOptions.DEFAULT);
+            UpdateResponse response = this.restHighLevelClient.update(new UpdateRequest(index, id).doc(entity).timeout(TimeValue.timeValueMinutes(1L)), RequestOptions.DEFAULT);
 
             log.info("update es document status -->>> " + response.status());
 
@@ -208,7 +212,11 @@ public class ESClient {
 
         try {
 
-            DeleteResponse response = this.restHighLevelClient.delete(new DeleteRequest(index, id).timeout(TimeValue.MINUS_ONE), RequestOptions.DEFAULT);
+            DeleteResponse response = this.restHighLevelClient.delete(
+
+                    new DeleteRequest(index, id)
+
+                            .timeout(TimeValue.timeValueMinutes(1L)), RequestOptions.DEFAULT);
 
             log.info("delete es document status -->>> " + response.status());
 
@@ -228,7 +236,7 @@ public class ESClient {
      */
     public boolean bulkDocument(Map<String, Object> map, String index) {
 
-        BulkRequest bulkRequest = new BulkRequest().timeout(TimeValue.MINUS_ONE);
+        BulkRequest bulkRequest = new BulkRequest().timeout(TimeValue.timeValueMinutes(1L));
 
         for (Map.Entry<String, Object> entry : map.entrySet()) {
 
@@ -270,7 +278,7 @@ public class ESClient {
      */
     public SearchHit[] accurateSearch(String index, String name, Object value) {
         // 条件构造
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().timeout(TimeValue.MINUS_ONE);
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().timeout(TimeValue.timeValueMinutes(1L));
         // 构建高亮
         searchSourceBuilder.highlighter(new HighlightBuilder());
         // 精确查询
@@ -288,13 +296,55 @@ public class ESClient {
 
             SearchHit[] hits = response.getHits().getHits();
 
-            Arrays.stream(hits).forEach(documentFields -> log.info("es termQuery result -->>> " + documentFields.getSourceAsString()));
+            Arrays.stream(hits).forEach(documentFields -> log.info("es accurateSearch result -->>> " + documentFields.getSourceAsString()));
 
             return hits;
 
         } catch (IOException e) {
 
-            log.error("es termQuery error!");
+            log.error("es accurateSearch error!");
+        }
+
+        return null;
+    }
+
+    public SearchHit[] splitWordSearch(String index, String key, int from, int size) {
+        // 条件构造
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().timeout(TimeValue.timeValueMinutes(1L));
+        // 构建高亮
+        searchSourceBuilder.highlighter(new HighlightBuilder());
+        // 组合查询
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        // title中包含 key或key_
+        boolQueryBuilder.should(QueryBuilders.matchPhrasePrefixQuery("title", key));
+        // content中包含 key或key_
+        boolQueryBuilder.should(QueryBuilders.matchPhrasePrefixQuery("content", key));
+
+        searchSourceBuilder.query(boolQueryBuilder)
+                // 结果过滤
+                .fetchSource(new String[] {""}, new String[] {"title", "content", "createTime"})
+                // 起始
+                .from(from)
+                // 大小
+                .size(size)
+                // 先按 相关分数 倒序
+                .sort(new ScoreSortBuilder().order(SortOrder.DESC))
+                // 然后按 创建时间 倒序
+                .sort(new FieldSortBuilder("createTime").order(SortOrder.DESC));
+
+        try {
+
+            SearchResponse response = this.restHighLevelClient.search(new SearchRequest(index).source(searchSourceBuilder), RequestOptions.DEFAULT);
+
+            SearchHit[] hits = response.getHits().getHits();
+
+            Arrays.stream(hits).forEach(documentFields -> log.info("es splitWordSearch result -->>> " + documentFields.getId()));
+
+            return hits;
+
+        } catch (IOException e) {
+
+            log.error("es splitWordSearch error!");
         }
 
         return null;
