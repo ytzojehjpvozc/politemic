@@ -77,15 +77,17 @@ public class PostSrv extends BasePostSrv {
         Integer pageNum = vo.getCurrentPageNum();
 
         Integer pageSize = vo.getCurrentPageSize();
+
+        SysUser sysUser = null;
         // 私密帖子要检查令牌
         if (StrUtil.equals(PostConfessionEnum.PRIVACY.getCode(), vo.getConfessed())) {
 
-            SysUser sysUser = this.userSrv.getUserInfoByToken(token);
+            sysUser = this.userSrv.getUserInfoByToken(token);
 
-            ServiceAssert.notNull(sysUser, "未登录不能获取私密帖子!");
+            ServiceAssert.notNull(sysUser, "权限异常!");
         }
         // 构建分页获取帖子列表的帖子实体
-        DiscussPosts dp = PostBuilder.buildPageGetPosts(vo);
+        DiscussPosts dp = PostBuilder.buildPageGetPosts(vo, sysUser);
         // 查找个数
         Integer count = this.selectCount(dp);
         // 尝试从 caffeine 中获取

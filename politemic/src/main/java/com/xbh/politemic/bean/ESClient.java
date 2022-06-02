@@ -308,6 +308,16 @@ public class ESClient {
         return null;
     }
 
+    /**
+     * 分词搜索
+     * @param index 索引
+     * @param key 关键词
+     * @param from 起始
+     * @param size 大小
+     * @return: org.elasticsearch.search.SearchHit[]
+     * @author: ZBoHang
+     * @time: 2022/1/4 16:04
+     */
     public SearchHit[] splitWordSearch(String index, String key, int from, int size) {
         // 条件构造
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().timeout(TimeValue.timeValueMinutes(1L));

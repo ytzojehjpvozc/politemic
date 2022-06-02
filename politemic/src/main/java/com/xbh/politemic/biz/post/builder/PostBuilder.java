@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.xbh.politemic.biz.post.domain.DiscussPosts;
 import com.xbh.politemic.biz.post.vo.PageGetPostsRequestVO;
 import com.xbh.politemic.biz.post.vo.PulishPostRequestVO;
+import com.xbh.politemic.biz.user.domain.SysUser;
 import com.xbh.politemic.common.enums.post.PostConfessionEnum;
 import com.xbh.politemic.common.enums.post.PostStatusEnum;
 import com.xbh.politemic.common.enums.post.PostTypeEnum;
@@ -93,11 +94,12 @@ public class PostBuilder {
      *      confessed
      *          帖子公开性 1-公开 2-私密 仅自己可见 默认公开
      *
+     * @param sysUser
      * @return: com.xbh.politemic.biz.post.domain.DiscussPosts
      * @author: ZBoHang
      * @time: 2021/12/15 11:38
      */
-    public static DiscussPosts buildPageGetPosts(PageGetPostsRequestVO vo) {
+    public static DiscussPosts buildPageGetPosts(PageGetPostsRequestVO vo, SysUser sysUser) {
 
         DiscussPosts discussPosts = null;
 
@@ -114,6 +116,11 @@ public class PostBuilder {
                     .setStatus(status)
 
                     .setConfessed(confessed);
+
+            if (StrUtil.equals(PostConfessionEnum.PRIVACY.getCode(), confessed)) {
+
+                discussPosts.setUserId(sysUser.getId());
+            }
         }
 
         return discussPosts;

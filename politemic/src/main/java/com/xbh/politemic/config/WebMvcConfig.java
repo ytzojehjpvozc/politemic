@@ -4,6 +4,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
 import com.xbh.politemic.interceptor.AuthInterceptor;
+import com.xbh.politemic.interceptor.IdempotentInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
@@ -28,7 +29,9 @@ import java.util.List;
 public class WebMvcConfig implements WebMvcConfigurer {
 
     @Autowired
-    AuthInterceptor authInterceptor;
+    private AuthInterceptor authInterceptor;
+    @Autowired
+    private IdempotentInterceptor idempotentInterceptor;
 
     /**
      * 添加类型转换器和格式化器
@@ -89,7 +92,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
 
-        registry.addInterceptor(authInterceptor)
+        registry.addInterceptor(this.authInterceptor)
+                .addPathPatterns("/**")
+                .excludePathPatterns("doc.html",
+                        "/swagger-resources/**",
+                        "/webjars/**",
+                        "/v2/**",
+                        "/swagger-ui.html/**");
+        registry.addInterceptor(this.idempotentInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns("doc.html",
                         "/swagger-resources/**",

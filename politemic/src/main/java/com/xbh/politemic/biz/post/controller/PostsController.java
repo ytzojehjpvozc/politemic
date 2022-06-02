@@ -4,6 +4,7 @@ import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import com.xbh.politemic.biz.post.srv.PostSrv;
 import com.xbh.politemic.biz.post.vo.PageGetPostsRequestVO;
 import com.xbh.politemic.biz.post.vo.PulishPostRequestVO;
+import com.xbh.politemic.common.annotation.ApiIdempotent;
 import com.xbh.politemic.common.annotation.NoneNeedLogin;
 import com.xbh.politemic.common.annotation.SysLog;
 import com.xbh.politemic.common.constant.CommonConstants;
@@ -91,5 +92,15 @@ public class PostsController {
         String token = ThreadLocalUtil.getToken();
 
         return Result.success(this.postSrv.getPostDetail(postId, token));
+    }
+
+    @ApiOperation("搜索帖子")
+    @ApiImplicitParam(name = "key", value = "搜索关键词", paramType = "query")
+    @ApiIdempotent
+    @PostMapping("seachPosts")
+    @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "搜索与指定关键词相关的帖子", remark = "搜索时会分词")
+    public Result seachPosts(String key) {
+
+        return Result.success(key);
     }
 }

@@ -72,6 +72,14 @@ public class CommonConstants {
      */
     public static final String CAFFEINE_CONFIG_PAGE_GET_POSTS_PRE = "Caffeine_pageGetPosts_";
 
+    /**
+     * es 中帖子的索引名称
+     */
     public static final String ES_POST_INDEX_NAME = "posts_index";
+
+    /**
+     * redis中幂等性 校验的key的前缀
+     */
+    public static final String REDIS_PRE_KEY_NAME_IDEMPOTENT = "Idempotent-";
 
 }
