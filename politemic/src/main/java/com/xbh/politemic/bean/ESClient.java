@@ -27,6 +27,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
@@ -318,7 +319,7 @@ public class ESClient {
      * @author: ZBoHang
      * @time: 2022/1/4 16:04
      */
-    public SearchHit[] splitWordSearch(String index, String key, int from, int size) {
+    public SearchHits splitWordSearch(String index, String key, int from, int size) {
         // 条件构造
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().timeout(TimeValue.timeValueMinutes(1L));
         // 构建高亮
@@ -346,9 +347,9 @@ public class ESClient {
 
             SearchResponse response = this.restHighLevelClient.search(new SearchRequest(index).source(searchSourceBuilder), RequestOptions.DEFAULT);
 
-            SearchHit[] hits = response.getHits().getHits();
+            SearchHits hits = response.getHits();
 
-            Arrays.stream(hits).forEach(documentFields -> log.info("es splitWordSearch result -->>> " + documentFields.getId()));
+            log.info("es splitWordSearch success!");
 
             return hits;
 

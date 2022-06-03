@@ -20,7 +20,7 @@ import java.io.Serializable;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @ApiModel
-public class PageGetPostsRequestVO extends PageUtil<Integer> implements Serializable {
+public class PageGetPostsRequestVO extends PageUtil implements Serializable {
 
     private static final long serialVersionUID = -4556826288312313420L;
 

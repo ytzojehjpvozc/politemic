@@ -2,12 +2,10 @@ package com.xbh.politemic.biz.post.srv;
 
 import cn.hutool.core.util.StrUtil;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.xbh.politemic.bean.ESClient;
 import com.xbh.politemic.biz.post.builder.PostBuilder;
 import com.xbh.politemic.biz.post.domain.DiscussPosts;
-import com.xbh.politemic.biz.post.vo.GetPostDetailResponseVO;
-import com.xbh.politemic.biz.post.vo.PageGetPostsRequestVO;
-import com.xbh.politemic.biz.post.vo.PageGetPostsResponseVO;
-import com.xbh.politemic.biz.post.vo.PulishPostRequestVO;
+import com.xbh.politemic.biz.post.vo.*;
 import com.xbh.politemic.biz.user.domain.SysUser;
 import com.xbh.politemic.biz.user.srv.UserSrv;
 import com.xbh.politemic.common.constant.CommonConstants;
@@ -16,6 +14,8 @@ import com.xbh.politemic.common.enums.post.PostStatusEnum;
 import com.xbh.politemic.common.util.PageUtil;
 import com.xbh.politemic.common.util.ServiceAssert;
 import com.xbh.politemic.task.AsyncTask;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -47,6 +44,8 @@ public class PostSrv extends BasePostSrv {
     private CommentSrv commentSrv;
     @Resource
     private LoadingCache<String, List<DiscussPosts>> postsListCaffeine;
+    @Autowired
+    private ESClient esClient;
 
     /**
      * 发布帖子
@@ -164,4 +163,66 @@ public class PostSrv extends BasePostSrv {
        return list;
     }
 
+    /**
+     * 通过关键词查询帖子
+     *
+     * @param vo vo
+     * @return: void
+     * @author: ZBoHang
+     * @time: 2022/1/5 10:11
+     */
+    public PageUtil<PageGetPostsResponseVO> searchPosts(PageSearchPostsRequestVO vo) {
+        // 当前页
+        Integer currentPageNum = vo.getCurrentPageNum();
+        // 每页
+        Integer currentPageSize = vo.getCurrentPageSize();
+
+        String key = vo.getKey();
+        // 从es中查
+        SearchHits searchHits = this.esClient.splitWordSearch(CommonConstants.ES_POST_INDEX_NAME, key, (currentPageNum - 1) * currentPageSize, currentPageSize);
+        // 总数
+        long total = searchHits.getTotalHits().value;
+
+        SearchHit[] hits = searchHits.getHits();
+
+        List<PageGetPostsResponseVO> voList = Arrays.stream(hits)
+                // 获取帖子id
+                .map(SearchHit::getId)
+                // 查询帖子详情
+                .map(this::selectByPrimaryKey)
+
+                .map(PageGetPostsResponseVO::build).collect(Collectors.toList());
+
+        List<String> ids = voList.stream()
+                // 过滤掉公开的
+                .filter(v -> StrUtil.equals(PostConfessionEnum.PRIVACY.getCode(), v.getConfessed()))
+
+                .map(PageGetPostsResponseVO::getId)
+
+                .collect(Collectors.toList());
+
+        if (!ids.isEmpty()) {
+
+            for (String id : ids) {
+                // 循环删除 私密帖
+                this.esClient.deleteDocument(CommonConstants.ES_POST_INDEX_NAME, id);
+            }
+        }
+
+        return new PageUtil<>(currentPageNum, currentPageSize, ((long) ids.size()), voList);
+    }
+
+    /**
+     * 通过帖子id 校验帖子是否公开 公开-ture 私密-false
+     * @param postId 帖子id
+     * @return: boolean
+     * @author: ZBoHang
+     * @time: 2022/1/5 11:14
+     */
+    public boolean checkPostConfessed(String postId) {
+
+        DiscussPosts discussPosts = this.selectByPrimaryKey(postId);
+
+        return StrUtil.equals(PostConfessionEnum.CONFESSED.getCode(), discussPosts.getConfessed()) ? Boolean.TRUE : Boolean.FALSE;
+    }
 }

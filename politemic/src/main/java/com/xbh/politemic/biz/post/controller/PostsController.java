@@ -3,6 +3,7 @@ package com.xbh.politemic.biz.post.controller;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import com.xbh.politemic.biz.post.srv.PostSrv;
 import com.xbh.politemic.biz.post.vo.PageGetPostsRequestVO;
+import com.xbh.politemic.biz.post.vo.PageSearchPostsRequestVO;
 import com.xbh.politemic.biz.post.vo.PulishPostRequestVO;
 import com.xbh.politemic.common.annotation.ApiIdempotent;
 import com.xbh.politemic.common.annotation.NoneNeedLogin;
@@ -95,12 +96,14 @@ public class PostsController {
     }
 
     @ApiOperation("搜索帖子")
-    @ApiImplicitParam(name = "key", value = "搜索关键词", paramType = "query")
+    @ApiOperationSupport(ignoreParameters = {"data", "totalPageSize", "totalResultSize"})
     @ApiIdempotent
-    @PostMapping("seachPosts")
-    @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "搜索与指定关键词相关的帖子", remark = "搜索时会分词")
-    public Result seachPosts(String key) {
+    @PostMapping("searchPosts")
+    @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "搜索与指定关键词相关的帖子", remark = "搜索时会分词,且搜索必须要登录")
+    public Result searchPosts(@ApiParam PageSearchPostsRequestVO vo) {
 
-        return Result.success(key);
+        ApiAssert.notNull(vo, "请求参数不能为空!");
+
+        return Result.success(this.postSrv.searchPosts(vo));
     }
 }
