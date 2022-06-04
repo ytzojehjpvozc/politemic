@@ -95,6 +95,13 @@ public class PostsController {
         return Result.success(this.postSrv.getPostDetail(postId, token));
     }
 
+    /**
+     * 搜索帖子 会分词 需要登录
+     * @param vo
+     * @return: com.xbh.politemic.common.util.Result
+     * @author: ZBoHang
+     * @time: 2022/1/5 14:31
+     */
     @ApiOperation("搜索帖子")
     @ApiOperationSupport(ignoreParameters = {"data", "totalPageSize", "totalResultSize"})
     @ApiIdempotent
