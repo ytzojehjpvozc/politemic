@@ -9,7 +9,7 @@
 
 ###### 1.用户注册流程
 
-![](<img src="https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/userRegister.png">)
+![](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/userRegister.png)
 
 ###### 2.用户登录流程
 
@@ -27,13 +27,19 @@
 
 ![私信_通知未读个数获取流程](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/getUnReadNoticeCnt.png)
 
+###### 6.修改用户信息
 
+​		用户信息的修改一个接口就可将密码、邮箱、评论尾巴及尾巴状态等用户信息进行修改。
+
+###### 7.分页获取(通知/私信)
+
+![用户信息获取模块](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/pageNotice.png)
 
 
 #### 安装教程
 
-1.  JDK1.8、idea
-2.  安装rabbitMQ3.9.5(erl 23.2)、redis3.2、mysql8.0.2
+1.  JDK1.8、idea、win10
+2.  安装rabbitMQ3.9.5(erl 23.2)、redis3.2、mysql8.0.2、elasticsearch7.15.1(必须安装analysis-ik分词插件,可以安装kibana使用它的命令行来测试es)
 3.  sql文件在[common/src/main/schemas/politemic.sql]
 
 #### 使用说明

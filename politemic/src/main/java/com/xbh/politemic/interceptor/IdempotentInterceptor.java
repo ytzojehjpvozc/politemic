@@ -36,19 +36,20 @@ public class IdempotentInterceptor extends HandlerInterceptorAdapter {
             ApiIdempotent apiIdempotent = (handlerMethod).getMethodAnnotation(ApiIdempotent.class);
             // 方法上面有 幂等性校验注解
             if (apiIdempotent != null) {
+                // 时间限制
+                long stintTime = apiIdempotent.stintTime();
                 //方法名
                 String methodName = handlerMethod.getMethod().getName();
                 // 请求令牌
                 String token = ThreadLocalUtil.getToken();
                 // key = pre + token + _ + method name
-                String key = CommonConstants.REDIS_PRE_KEY_NAME_IDEMPOTENT + token + StrUtil.UNDERLINE + methodName;
+                String key = CommonConstants.REDIS_PRE_KEY_NAME_IDEMPOTENT + methodName + StrUtil.UNDERLINE + token;
                 // 从redis中尝试拿 锁
                 Boolean hasKeyFlag = this.redisClient.hasKey(key);
                 // 有锁则拦截 报错
                 ServiceAssert.isFalse(hasKeyFlag, "操作频繁,请稍后再试!");
-                // TODO: 2022/1/5 暂时先写个5秒 校验幂等
                 // 无锁先加锁
-                this.redisClient.set(key, null, 30L);
+                this.redisClient.set(key, null, stintTime);
             }
         }
         // 放行

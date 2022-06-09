@@ -40,6 +40,7 @@ public class PostsController {
      * @time: 2021/12/15 16:53
      */
     @ApiOperation(value = "发布帖子")
+    @ApiIdempotent(describe = "同一请求发布帖子的时间限", stintTime = 10L)
     @PostMapping("publishPosts")
     @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "发布帖子", remark = "发布完事审核,结果会以系统通知方式传递给用户")
     public Result publishPosts(@ApiParam PulishPostRequestVO vo) {
@@ -104,7 +105,7 @@ public class PostsController {
      */
     @ApiOperation("搜索帖子")
     @ApiOperationSupport(ignoreParameters = {"data", "totalPageSize", "totalResultSize"})
-    @ApiIdempotent
+    @ApiIdempotent(describe = "同一请求搜索帖子的时间限", stintTime = 30L)
     @PostMapping("searchPosts")
     @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "搜索与指定关键词相关的帖子", remark = "搜索时会分词,且搜索必须要登录")
     public Result searchPosts(@ApiParam PageSearchPostsRequestVO vo) {

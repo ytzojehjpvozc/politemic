@@ -2,6 +2,7 @@ package com.xbh.politemic.biz.post.controller;
 
 import com.xbh.politemic.biz.post.srv.CommentSrv;
 import com.xbh.politemic.biz.post.vo.PublishCommentRequestVO;
+import com.xbh.politemic.common.annotation.ApiIdempotent;
 import com.xbh.politemic.common.annotation.SysLog;
 import com.xbh.politemic.common.constant.CommonConstants;
 import com.xbh.politemic.common.util.ApiAssert;
@@ -29,6 +30,7 @@ public class CommentController {
     private CommentSrv commentSrv;
 
     @ApiOperation("发布评论")
+    @ApiIdempotent(describe = "同一请求搜索帖子的时间限", stintTime = 7L)
     @PostMapping("publishComment")
     @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "发布评论", remark = "发布完事审核,结果会以系统通知方式传递给用户")
     public Result publishComment(@ApiParam PublishCommentRequestVO vo) {

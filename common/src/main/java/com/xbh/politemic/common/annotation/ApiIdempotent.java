@@ -13,4 +13,14 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ApiIdempotent {
+
+    /**
+     * 描述
+     */
+    String describe() default "";
+
+    /**
+     * 限制时间
+     */
+    long stintTime() default 10L;
 }
