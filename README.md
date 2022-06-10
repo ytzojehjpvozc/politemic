@@ -9,11 +9,11 @@
 
 ###### 1.用户注册流程
 
-![](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/userRegister.png)
+![用户注册流程](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/userRegister.png)
 
 ###### 2.用户登录流程
 
-![](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/userLogin.png)
+![用户登录流程](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/userLogin.png)
 
 ###### 3.用户激活流程
 
@@ -33,7 +33,25 @@
 
 ###### 7.分页获取(通知/私信)
 
-![用户信息获取模块](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/pageNotice.png)
+![分页获取(通知/私信)](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/pageNotice.png)
+
+###### 8.获取(通知/私信)详情
+
+![获取(通知/私信)详情](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/getNoticeDetail.png)
+
+###### 9.分页查询帖子
+
+![分页查询帖子模块](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/pageGetPosts.png)
+
+###### 10.搜索帖子
+
+![搜索帖子模块](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/searchPosts.png)
+
+###### 11.发布帖子
+
+
+
+###### 12.获取帖子详情
 
 
 #### 安装教程

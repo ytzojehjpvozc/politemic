@@ -192,13 +192,13 @@ public class PostSrv extends BasePostSrv {
 
                 .map(PageGetPostsResponseVO::build).collect(Collectors.toList());
 
-        List<String> ids = voList.stream()
+        Set<String> ids = voList.stream()
                 // 过滤掉公开的
                 .filter(v -> StrUtil.equals(PostConfessionEnum.PRIVACY.getCode(), v.getConfessed()))
 
                 .map(PageGetPostsResponseVO::getId)
 
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
 
         if (!ids.isEmpty()) {
 
@@ -208,7 +208,9 @@ public class PostSrv extends BasePostSrv {
             }
         }
 
-        return new PageUtil<>(currentPageNum, currentPageSize, ((long) ids.size()), voList);
+        List<PageGetPostsResponseVO> resultList = voList.stream().filter(v -> !ids.contains(v.getId())).collect(Collectors.toList());
+
+        return new PageUtil<>(currentPageNum, currentPageSize, ((long) resultList.size()), resultList);
     }
 
     /**
