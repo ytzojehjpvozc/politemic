@@ -49,14 +49,16 @@
 
 ###### 11.发布帖子
 
-
+![发布帖子模块](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/publishPost.png)
 
 ###### 12.获取帖子详情
+
+![获取帖子详情模块](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/getPostDetail.png)
 
 
 #### 安装教程
 
-1.  JDK1.8、idea、win10
+1.  JDK1.8、idea
 2.  安装rabbitMQ3.9.5(erl 23.2)、redis3.2、mysql8.0.2、elasticsearch7.15.1(必须安装analysis-ik分词插件,可以安装kibana使用它的命令行来测试es)
 3.  sql文件在[common/src/main/schemas/politemic.sql]
 
@@ -75,4 +77,4 @@
 
 #### 特技
 
-1.  
+1.  想找一个写前端的合作,接口文档会在后面的提交中附上。
