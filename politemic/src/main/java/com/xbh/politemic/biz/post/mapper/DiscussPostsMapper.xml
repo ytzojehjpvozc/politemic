@@ -13,8 +13,6 @@
     <result column="type" jdbcType="CHAR" property="type" />
     <result column="status" jdbcType="CHAR" property="status" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
-    <result column="star_count" jdbcType="INTEGER" property="starCount" />
-    <result column="comment_count" jdbcType="INTEGER" property="commentCount" />
     <result column="confessed" jdbcType="CHAR" property="confessed" />
   </resultMap>
   <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.xbh.politemic.biz.post.domain.DiscussPosts">

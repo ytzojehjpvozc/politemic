@@ -46,16 +46,6 @@ public class DiscussPosts implements Serializable {
     private Date createTime;
 
     /**
-     * 帖子点赞数
-     */
-    private Integer starCount;
-
-    /**
-     * 帖子评论数
-     */
-    private Integer commentCount;
-
-    /**
      * 帖子内容
      */
     private String content;

@@ -48,8 +48,6 @@ CREATE TABLE `discuss_posts`  (
   `type` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '帖子类型 1-普通 2-置顶',
   `status` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '帖子状态\r\n 1-发表后待审核\r\n 2-正常\r\n 3-精华帖\r\n 4-管理删除、审核未通过的拉黑帖\r\n 5-仅自己可见的私密帖',
   `create_time` datetime(0) NULL DEFAULT NULL COMMENT '帖子创建时间',
-  `star_count` int(0) NULL DEFAULT NULL COMMENT '帖子点赞数',
-  `comment_count` int(0) NULL DEFAULT NULL COMMENT '帖子评论数',
   `confessed` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '帖子公开性 1-公开 2-私密 仅自己可见',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
@@ -57,13 +55,13 @@ CREATE TABLE `discuss_posts`  (
 -- ----------------------------
 -- Records of discuss_posts
 -- ----------------------------
-INSERT INTO `discuss_posts` VALUES ('1ca63bd455e941c9902c221e5d8937f8', '10a0c6f04a694d0e8eb293e2f314f4e3', '专题:Kibana', 'Kibana今天星期二，微风，有太阳', '1', '2', '2021-12-28 17:53:40', NULL, NULL, '1');
-INSERT INTO `discuss_posts` VALUES ('6a20835bcc1243e7a02144489dbee4ea', '10a0c6f04a694d0e8eb293e2f314f4e3', '专题:Kibana', 'Kibana今天星期二，微风', '1', '2', '2021-12-28 17:24:25', NULL, NULL, '1');
-INSERT INTO `discuss_posts` VALUES ('6ed6e67b5aa243feae60b2bda46a8472', '10a0c6f04a694d0e8eb293e2f314f4e3', '专题:Logstash', 'Logstash今天微风，有太阳', '1', '2', '2021-12-28 17:23:51', NULL, NULL, '1');
-INSERT INTO `discuss_posts` VALUES ('7ae3b5c9d2174fafa40ca496f339d181', '10a0c6f04a694d0e8eb293e2f314f4e3', '专题:二狗', 'Kibana今天星期二，微风，有一个人对着太阳笑', '1', '2', '2021-12-30 17:55:48', NULL, NULL, '1');
-INSERT INTO `discuss_posts` VALUES ('95fff630dddb4495b99a15a616da3a39', '10a0c6f04a694d0e8eb293e2f314f4e3', '专题:Elasticsearch', 'Elasticsearch今天星期二，有太阳', '1', '2', '2021-12-28 17:23:31', NULL, NULL, '1');
-INSERT INTO `discuss_posts` VALUES ('961f457c888b4c7491efde9c884a4fe1', '10a0c6f04a694d0e8eb293e2f314f4e3', '专题:Kibana', 'Kibana今天星期二，微风', '1', '2', '2021-12-28 17:35:06', NULL, NULL, '1');
-INSERT INTO `discuss_posts` VALUES ('c079f92d65e64d3e9f017473c792cdc7', '10a0c6f04a694d0e8eb293e2f314f4e3', '专题:ELK', 'ELK今天星期二，微风，有太阳', '1', '2', '2021-12-28 17:22:57', NULL, NULL, '1');
+INSERT INTO `discuss_posts` VALUES ('1ca63bd455e941c9902c221e5d8937f8', '10a0c6f04a694d0e8eb293e2f314f4e3', '专题:Kibana', 'Kibana今天星期二，微风，有太阳', '1', '2', '2021-12-28 17:53:40', '1');
+INSERT INTO `discuss_posts` VALUES ('6a20835bcc1243e7a02144489dbee4ea', '10a0c6f04a694d0e8eb293e2f314f4e3', '专题:Kibana', 'Kibana今天星期二，微风', '1', '2', '2021-12-28 17:24:25', '1');
+INSERT INTO `discuss_posts` VALUES ('6ed6e67b5aa243feae60b2bda46a8472', '10a0c6f04a694d0e8eb293e2f314f4e3', '专题:Logstash', 'Logstash今天微风，有太阳', '1', '2', '2021-12-28 17:23:51', '1');
+INSERT INTO `discuss_posts` VALUES ('7ae3b5c9d2174fafa40ca496f339d181', '10a0c6f04a694d0e8eb293e2f314f4e3', '专题:二狗', 'Kibana今天星期二，微风，有一个人对着太阳笑', '1', '2', '2021-12-30 17:55:48', '1');
+INSERT INTO `discuss_posts` VALUES ('95fff630dddb4495b99a15a616da3a39', '10a0c6f04a694d0e8eb293e2f314f4e3', '专题:Elasticsearch', 'Elasticsearch今天星期二，有太阳', '1', '2', '2021-12-28 17:23:31', '1');
+INSERT INTO `discuss_posts` VALUES ('961f457c888b4c7491efde9c884a4fe1', '10a0c6f04a694d0e8eb293e2f314f4e3', '专题:Kibana', 'Kibana今天星期二，微风', '1', '2', '2021-12-28 17:35:06', '1');
+INSERT INTO `discuss_posts` VALUES ('c079f92d65e64d3e9f017473c792cdc7', '10a0c6f04a694d0e8eb293e2f314f4e3', '专题:ELK', 'ELK今天星期二，微风，有太阳', '1', '2', '2021-12-28 17:22:57', '1');
 
 -- ----------------------------
 -- Table structure for notice

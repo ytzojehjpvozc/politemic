@@ -30,7 +30,7 @@ public class CommentController {
     private CommentSrv commentSrv;
 
     @ApiOperation("发布评论")
-    @ApiIdempotent(describe = "同一请求搜索帖子的时间限", stintTime = 7L)
+    @ApiIdempotent(describe = "同一请求发布评论的时间限", stintTime = 7L)
     @PostMapping("publishComment")
     @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "发布评论", remark = "发布完事审核,结果会以系统通知方式传递给用户")
     public Result publishComment(@ApiParam PublishCommentRequestVO vo) {

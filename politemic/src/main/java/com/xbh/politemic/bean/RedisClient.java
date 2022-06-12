@@ -52,4 +52,40 @@ public class RedisClient {
     public void del(String key) {
         this.redisTemplate.delete(key);
     }
+
+    /**
+     * 添加值 到指定集合set
+     * @author: ZBoHang
+     * @time: 2022/1/6 10:22
+     */
+    public void sadd(String key, String value) {
+        this.redisTemplate.opsForSet().add(key, value);
+    }
+
+    /**
+     * 删除值 从指定集合set
+     * @author: ZBoHang
+     * @time: 2022/1/6 11:01
+     */
+    public void sremove(String key, String value) {
+        this.redisTemplate.opsForSet().remove(key, value);
+    }
+
+    /**
+     * 查找指定 键值 是否存在
+     * @author: ZBoHang
+     * @time: 2022/1/6 11:22
+     */
+    public boolean isMember(String key, String value) {
+       return this.redisTemplate.opsForSet().isMember(key, value);
+    }
+
+    /**
+     * 获取指定set的size
+     * @author: ZBoHang
+     * @time: 2022/1/6 11:56
+     */
+    public Long ssize(String key) {
+        return this.redisTemplate.opsForSet().size(key);
+    }
 }

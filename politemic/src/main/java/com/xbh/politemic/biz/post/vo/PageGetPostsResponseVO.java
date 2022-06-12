@@ -1,8 +1,10 @@
 package com.xbh.politemic.biz.post.vo;
 
 import cn.hutool.extra.spring.SpringUtil;
+import com.xbh.politemic.bean.RedisClient;
 import com.xbh.politemic.biz.post.domain.DiscussPosts;
 import com.xbh.politemic.biz.user.srv.UserSrv;
+import com.xbh.politemic.common.constant.PostConstants;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -57,12 +59,7 @@ public class PageGetPostsResponseVO implements Serializable {
     /**
      * 帖子点赞数
      */
-    private Integer starCount;
-
-    /**
-     * 帖子评论数
-     */
-    private Integer commentCount;
+    private Long starCount;
 
     /**
      * 帖子公开性 1-公开 2-私密 仅自己可见 默认公开
@@ -86,6 +83,10 @@ public class PageGetPostsResponseVO implements Serializable {
             // 获取发布用户名称
             String userName = userSrv.selectByPrimaryKey(posts.getUserId()).getUserName();
 
+            RedisClient redisClient = SpringUtil.getBean(RedisClient.class);
+            // 点赞数
+            Long starCount = redisClient.ssize(PostConstants.REDIS_POST_LIKE_KEY_PRE + posts.getId());
+
             vo = new PageGetPostsResponseVO()
                     // 序号
                     .setId(posts.getId())
@@ -100,9 +101,7 @@ public class PageGetPostsResponseVO implements Serializable {
                     // 创建时间
                     .setCreateTime(posts.getCreateTime())
                     // 点赞数
-                    .setStarCount(posts.getStarCount())
-                    // 评论数
-                    .setCommentCount(posts.getCommentCount())
+                    .setStarCount(starCount)
                     // 公开性
                     .setConfessed(posts.getConfessed());
         }

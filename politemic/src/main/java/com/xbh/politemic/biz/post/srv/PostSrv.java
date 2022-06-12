@@ -3,12 +3,14 @@ package com.xbh.politemic.biz.post.srv;
 import cn.hutool.core.util.StrUtil;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.xbh.politemic.bean.ESClient;
+import com.xbh.politemic.bean.RedisClient;
 import com.xbh.politemic.biz.post.builder.PostBuilder;
 import com.xbh.politemic.biz.post.domain.DiscussPosts;
 import com.xbh.politemic.biz.post.vo.*;
 import com.xbh.politemic.biz.user.domain.SysUser;
 import com.xbh.politemic.biz.user.srv.UserSrv;
 import com.xbh.politemic.common.constant.CommonConstants;
+import com.xbh.politemic.common.constant.PostConstants;
 import com.xbh.politemic.common.enums.post.PostConfessionEnum;
 import com.xbh.politemic.common.enums.post.PostStatusEnum;
 import com.xbh.politemic.common.util.PageUtil;
@@ -46,6 +48,8 @@ public class PostSrv extends BasePostSrv {
     private LoadingCache<String, List<DiscussPosts>> postsListCaffeine;
     @Autowired
     private ESClient esClient;
+    @Autowired
+    private RedisClient redisClient;
 
     /**
      * 发布帖子
@@ -225,5 +229,43 @@ public class PostSrv extends BasePostSrv {
         DiscussPosts discussPosts = this.selectByPrimaryKey(postId);
 
         return StrUtil.equals(PostConfessionEnum.CONFESSED.getCode(), discussPosts.getConfessed()) ? Boolean.TRUE : Boolean.FALSE;
+    }
+
+    /**
+     * 点赞/取消点赞 帖子
+     * @param postId 帖子id
+     * @param userId 用户id
+     * @return: java.lang.String
+     * @author: ZBoHang
+     * @time: 2022/1/6 11:16
+     */
+    public String likePost(String postId, String userId) {
+
+        DiscussPosts discussPosts = this.selectByPrimaryKey(postId);
+
+        ServiceAssert.notNull(discussPosts, "帖子不存在!");
+
+        String status = discussPosts.getStatus();
+
+        String confessed = discussPosts.getConfessed();
+
+        ServiceAssert.isFalse(StrUtil.equals(PostStatusEnum.PENDING_REVIEW.getCode(), status)
+
+                || StrUtil.equals(PostStatusEnum.SHIELD.getCode(), status)
+
+                || StrUtil.equals(PostConfessionEnum.PRIVACY.getCode(), confessed), "没有权限操作帖子!");
+        // 是否已经点过赞
+        boolean flag = this.redisClient.isMember(PostConstants.REDIS_POST_LIKE_KEY_PRE + postId, PostConstants.REDIS_POST_LIKE_USER_KEY_PRE + userId);
+
+        if (flag) {
+            // 已经点过赞 则取消
+            this.redisClient.sremove(PostConstants.REDIS_POST_LIKE_KEY_PRE + postId, PostConstants.REDIS_POST_LIKE_USER_KEY_PRE + userId);
+
+            return "取消成功!";
+        }
+        // 没点过赞 则点赞
+        this.redisClient.sadd(PostConstants.REDIS_POST_LIKE_KEY_PRE + postId, PostConstants.REDIS_POST_LIKE_USER_KEY_PRE + userId);
+
+        return "点赞成功!";
     }
 }

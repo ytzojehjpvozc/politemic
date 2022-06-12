@@ -12,10 +12,7 @@ import com.xbh.politemic.common.constant.CommonConstants;
 import com.xbh.politemic.common.util.ApiAssert;
 import com.xbh.politemic.common.util.Result;
 import com.xbh.politemic.common.util.ThreadLocalUtil;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -113,5 +110,20 @@ public class PostsController {
         ApiAssert.notNull(vo, "请求参数不能为空!");
 
         return Result.success(this.postSrv.searchPosts(vo));
+    }
+
+    @ApiOperation("点赞/取消点赞 帖子")
+    @ApiImplicitParams(
+            @ApiImplicitParam(name = "postId", value = "帖子id", paramType = "query")
+    )
+    @PostMapping("likePost")
+    @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "点赞指定的帖子", remark = "需登录")
+    public Result likePost(String postId) {
+
+        ApiAssert.noneBlank(postId, "未获取到帖子id!");
+
+        String userId = ThreadLocalUtil.getUserId();
+
+        return Result.success(this.postSrv.likePost(postId, userId));
     }
 }
