@@ -132,4 +132,13 @@ public class UserController {
         return Result.success(this.userSrv.modifyUserInfo(token, vo));
     }
 
+    @ApiOperation("获赞数量")
+    @GetMapping("myStar")
+    @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "我的获赞数量", remark = "需要登录")
+    public Result myStar() {
+
+        String token = ThreadLocalUtil.getToken();
+
+        return Result.success(this.userSrv.myStar(token));
+    }
 }

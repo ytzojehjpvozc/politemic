@@ -86,8 +86,6 @@ public class PostSrv extends BasePostSrv {
         if (StrUtil.equals(PostConfessionEnum.PRIVACY.getCode(), vo.getConfessed())) {
 
             sysUser = this.userSrv.getUserInfoByToken(token);
-
-            ServiceAssert.notNull(sysUser, "权限异常!");
         }
         // 构建分页获取帖子列表的帖子实体
         DiscussPosts dp = PostBuilder.buildPageGetPosts(vo, sysUser);

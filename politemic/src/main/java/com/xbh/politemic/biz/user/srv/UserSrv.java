@@ -10,6 +10,8 @@ import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.xbh.politemic.bean.RedisClient;
+import com.xbh.politemic.biz.post.domain.DiscussPosts;
+import com.xbh.politemic.biz.post.srv.BasePostSrv;
 import com.xbh.politemic.biz.user.builder.UserBuilder;
 import com.xbh.politemic.biz.user.domain.SysUser;
 import com.xbh.politemic.biz.user.domain.UserToken;
@@ -17,6 +19,7 @@ import com.xbh.politemic.biz.user.vo.GetUserInfoResponseVO;
 import com.xbh.politemic.biz.user.vo.ModifyUserInfoRequestVO;
 import com.xbh.politemic.biz.user.vo.UserLoginRequestVO;
 import com.xbh.politemic.biz.user.vo.UserRegisterRequestVO;
+import com.xbh.politemic.common.constant.PostConstants;
 import com.xbh.politemic.common.constant.UserConstant;
 import com.xbh.politemic.common.enums.user.UserStatusEnum;
 import com.xbh.politemic.common.enums.user.UserTailStatusEnum;
@@ -31,7 +34,9 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @Description: 用户-用户业务层实现类
@@ -58,6 +63,8 @@ public class UserSrv extends BaseUserSrv {
     private RedisClient redisClient;
     @Autowired
     private Environment environment;
+    @Autowired
+    private BasePostSrv basePostSrv;
 
     /**
      * 用户登录
@@ -244,7 +251,37 @@ public class UserSrv extends BaseUserSrv {
     }
 
     /**
-     * 通过令牌获取用户 源 信息 只能获取token对应的用户信息
+     * 获取我的获赞数
+     * @param token 用户令牌
+     * @return: java.lang.Long
+     * @author: ZBoHang
+     * @time: 2022/1/6 14:23
+     */
+    public Long myStar(String token) {
+
+        SysUser sysUser = this.getUserInfoByToken(token);
+
+        Example example = Example.builder(DiscussPosts.class).build();
+
+        Example.Criteria criteria = example.createCriteria();
+
+        criteria.andEqualTo("userId", sysUser.getId());
+
+        List<DiscussPosts> posts = this.basePostSrv.selectByExample(example);
+
+        Optional<Long> count = posts.stream()
+                // 获取该用户所有的帖子id
+                .map(DiscussPosts::getId)
+                // 获取用户每一个帖子的获赞数
+                .map(postId -> this.redisClient.ssize(PostConstants.REDIS_POST_LIKE_KEY_PRE + postId))
+                // 汇总
+                .reduce(Long::sum);
+
+        return count.get();
+    }
+
+    /**
+     * 通过令牌获取用户 源 信息 只能获取token对应的用户信息 能肯定结果
      * @param token 用户令牌
      * @return: com.xbh.politemic.biz.user.domain.SysUser
      * @author: ZBoHang
