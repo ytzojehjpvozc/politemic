@@ -18,16 +18,6 @@ public class CommonConstants {
     public static final String ADMIN_MODEL_NAME = "管理人员模块";
 
     /**
-     * 状态 Y
-     */
-    public static final String STATUS_Y = "Y";
-
-    /**
-     * 状态 N
-     */
-    public static final String STATUS_N = "N";
-
-    /**
      * 异常报告
      */
     public static final String EXCEPTIONS_REPORT = "请求发生错误,异常编号: {} ,请联系管理员处理";

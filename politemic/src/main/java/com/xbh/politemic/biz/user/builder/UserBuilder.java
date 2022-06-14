@@ -1,10 +1,8 @@
 package com.xbh.politemic.biz.user.builder;
 
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.xbh.politemic.biz.user.domain.SysUser;
-import com.xbh.politemic.biz.user.domain.UserToken;
 import com.xbh.politemic.biz.user.vo.UserRegisterRequestVO;
 import com.xbh.politemic.common.constant.UserConstant;
 import com.xbh.politemic.common.enums.user.UserAuthFieldLevelEnum;
@@ -19,29 +17,6 @@ import org.springframework.core.env.Environment;
  * @time: 2021/12/10 9:13
  */
 public class UserBuilder {
-
-    /**
-     * 构建一个新的token
-     * @author: ZBoHang
-     * @time: 2021/12/10 9:10
-     */
-    public static UserToken buildNewToken(String userId, String token) {
-
-        UserToken userToken = null;
-
-        if (StrUtil.isAllNotBlank(userId, token)) {
-
-            userToken = new UserToken().setUserId(userId)
-
-                    .setToken(token)
-
-                    .setExpire(DateUtil.date(System.currentTimeMillis() + UserConstant.TOKEN_TIME_OUT_IN_DB));
-
-
-        }
-
-        return userToken;
-    }
 
     /**
      * 构建一个新的系统用户

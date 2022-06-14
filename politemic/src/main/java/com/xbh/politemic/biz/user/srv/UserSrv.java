@@ -12,6 +12,7 @@ import cn.hutool.json.JSONUtil;
 import com.xbh.politemic.bean.RedisClient;
 import com.xbh.politemic.biz.post.domain.DiscussPosts;
 import com.xbh.politemic.biz.post.srv.BasePostSrv;
+import com.xbh.politemic.biz.user.builder.TokenBuilder;
 import com.xbh.politemic.biz.user.builder.UserBuilder;
 import com.xbh.politemic.biz.user.domain.SysUser;
 import com.xbh.politemic.biz.user.domain.UserToken;
@@ -90,11 +91,11 @@ public class UserSrv extends BaseUserSrv {
         // 生成一个登录令牌
         String token = StrKit.getUUID();
         // 从数据库中查找是否登录过
-        UserToken userToken = this.baseUserTokenSrv.selectOne(new UserToken().setUserId(user.getId()));
+        UserToken userToken = this.baseUserTokenSrv.selectOne(TokenBuilder.buildWithUserId(user.getId()));
         // 获取原 token
         String originalToken = userToken != null ? userToken.getToken() : StrUtil.EMPTY;
         // 构建新的token
-        userToken = UserBuilder.buildNewToken(user.getId(), token);
+        userToken = TokenBuilder.buildNewToken(user.getId(), token);
         // 保存令牌 和 用户信息  同类中未开启事务方法调用事务方法，事务不生效
         this.saveUserToken(userToken, originalToken, user);
         // TODO: 2021/10/12 登录后的数据返回
@@ -300,7 +301,7 @@ public class UserSrv extends BaseUserSrv {
             return JSONUtil.toBean(userJsonStr, SysUser.class);
         }
         // redis中没有 查库判断token是否有效
-        UserToken userToken = this.baseUserTokenSrv.selectOne(new UserToken().setToken(token));
+        UserToken userToken = this.baseUserTokenSrv.selectOne(TokenBuilder.buildWithToken(token));
 
         ServiceAssert.isTrue(userToken != null, "令牌不存在!");
         // 当前时间
