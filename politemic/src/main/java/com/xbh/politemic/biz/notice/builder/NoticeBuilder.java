@@ -57,4 +57,32 @@ public class NoticeBuilder {
 
         return notice;
     }
+
+    /**
+     * 构建一个未读的 带有内容的 通知
+     * @param followedUserId 瑞松用户id
+     * @param content 通知内容
+     * @return: com.xbh.politemic.biz.notice.domain.Notice
+     * @author: ZBoHang
+     * @time: 2022/1/6 17:16
+     */
+    public static Notice buildUnReadStatusWithContentNotice(String followedUserId, String content) {
+
+        Notice notice = null;
+
+        if (StrUtil.isNotBlank(followedUserId)) {
+
+            notice = new Notice()
+                    // 通知状态 0-未读 1-已读 2-删除
+                    .setStatus(NoticeStatusEnum.UNREAD_STATUS.getCode())
+                    // 通知生成时间
+                    .setTime(DateUtil.date())
+                    // 推送用户id
+                    .setToId(followedUserId)
+                    // 通知内容
+                    .setContent(content);
+        }
+
+        return notice;
+    }
 }
