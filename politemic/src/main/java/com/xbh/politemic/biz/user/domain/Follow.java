@@ -3,6 +3,7 @@ package com.xbh.politemic.biz.user.domain;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -14,6 +15,7 @@ public class Follow implements Serializable {
     /**
      * 关注用户id
      */
+    @Id
     private String followUserId;
 
     /**

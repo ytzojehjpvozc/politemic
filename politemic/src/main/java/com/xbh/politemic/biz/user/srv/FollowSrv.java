@@ -42,12 +42,12 @@ public class FollowSrv extends BaseFollowSrv {
             // 有记录 但是 无效
             if (StrUtil.equals(FollowStatusEnum.INVALID.getCode(), follow.getStatus())) {
                 // 关注指定用户
-                this.updateByPrimaryKey(FollowBuilder.buildOppositeStatus(follow));
+                this.updateByPrimaryKeySelective(FollowBuilder.buildOppositeStatus(follow));
 
                 return "关注成功!";
             }
             // 取消关注指定用户
-            this.updateByPrimaryKey(FollowBuilder.buildOppositeStatus(follow));
+            this.updateByPrimaryKeySelective(FollowBuilder.buildOppositeStatus(follow));
 
             return "取消成功!";
         }

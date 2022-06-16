@@ -23,11 +23,12 @@ public class FollowBuilder {
 
         if (follow != null) {
 
+            follow.setFollowTime(DateUtil.date());
+
             if (StrUtil.equals(FollowStatusEnum.EFFECTIVE.getCode(), follow.getStatus())) {
 
                 follow.setStatus(FollowStatusEnum.INVALID.getCode());
-            }
-            if (StrUtil.equals(FollowStatusEnum.INVALID.getCode(), follow.getStatus())) {
+            } else {
 
                 follow.setStatus(FollowStatusEnum.EFFECTIVE.getCode());
             }
