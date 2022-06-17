@@ -242,5 +242,20 @@ CREATE TABLE `user_token`  (
 -- Records of user_token
 -- ----------------------------
 
+-- ----------------------------
+-- Table structure for follow
+-- ----------------------------
+DROP TABLE IF EXISTS `follow`;
+CREATE TABLE `follow`  (
+                           `follow_user_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '关注用户id',
+                           `followed_user_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '被关注用户id',
+                           `follow_time` datetime(0) NULL DEFAULT NULL COMMENT '关注时间',
+                           `status` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '是否有效 1-有效 2-无效',
+                           PRIMARY KEY (`follow_user_id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of follow
+-- ----------------------------
 
 SET FOREIGN_KEY_CHECKS = 1;
