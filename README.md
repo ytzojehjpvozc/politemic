@@ -31,29 +31,37 @@
 
 ​		用户信息的修改一个接口就可将密码、邮箱、评论尾巴及尾巴状态等用户信息进行修改。
 
-###### 7.分页获取(通知/私信)
+###### 7.分页获取(通知/私信)流程
 
-![分页获取(通知/私信)](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/pageNotice.png)
+![分页获取(通知/私信)流程](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/pageNotice.png)
 
-###### 8.获取(通知/私信)详情
+###### 8.获取(通知/私信)详情流程
 
-![获取(通知/私信)详情](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/getNoticeDetail.png)
+![获取(通知/私信)详情流程](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/getNoticeDetail.png)
 
-###### 9.分页查询帖子
+###### 9.分页查询帖子流程
 
-![分页查询帖子模块](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/pageGetPosts.png)
+![分页查询帖子流程](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/pageGetPosts.png)
 
-###### 10.搜索帖子
+###### 10.搜索帖子流程
 
-![搜索帖子模块](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/searchPosts.png)
+![搜索帖子流程](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/searchPosts.png)
 
-###### 11.发布帖子
+###### 11.发布帖子流程
 
-![发布帖子模块](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/publishPost.png)
+![发布帖子流程](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/publishPost.png)
 
-###### 12.获取帖子详情
+###### 12.获取帖子详情流程
 
-![获取帖子详情模块](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/getPostDetail.png)
+![获取帖子详情流程](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/getPostDetail.png)
+
+###### 13.发送评论流程
+
+![发送评论流程](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/publishComment.png)
+
+###### 14.关注用户流程
+
+![关注用户流程](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/followUser.png)
 
 
 #### 安装教程
