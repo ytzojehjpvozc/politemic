@@ -5,6 +5,7 @@ import com.xbh.politemic.biz.notice.builder.NoticeBuilder;
 import com.xbh.politemic.biz.notice.domain.Notice;
 import com.xbh.politemic.biz.notice.vo.PageNoticeRequestVO;
 import com.xbh.politemic.biz.notice.vo.PageNoticeResponseVO;
+import com.xbh.politemic.biz.notice.vo.SendLetterRequestVO;
 import com.xbh.politemic.biz.user.srv.UserSrv;
 import com.xbh.politemic.biz.user.vo.GetNoticeDetailResponseVO;
 import com.xbh.politemic.common.constant.NoticeConstant;
@@ -159,5 +160,18 @@ public class NoticeSrv extends BaseNoticeSrv {
         }
         // 返回page
         return new PageUtil<>(pageNum, pageSize, count.longValue(), voList);
+    }
+
+    /**
+     * 发送私信 前提是互关
+     * @param vo vo
+     * @param userId 私信发送人id
+     * @return: void
+     * @author: ZBoHang
+     * @time: 2022/1/7 17:23
+     */
+    public void sendLetter(SendLetterRequestVO vo, String userId) {
+
+
     }
 }

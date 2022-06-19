@@ -3,7 +3,8 @@ package com.xbh.politemic.biz.notice.controller;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import com.xbh.politemic.biz.notice.srv.NoticeSrv;
 import com.xbh.politemic.biz.notice.vo.PageNoticeRequestVO;
-import com.xbh.politemic.biz.user.vo.GetNoticeDetailResponseVO;
+import com.xbh.politemic.biz.notice.vo.SendLetterRequestVO;
+import com.xbh.politemic.common.annotation.ApiIdempotent;
 import com.xbh.politemic.common.annotation.SysLog;
 import com.xbh.politemic.common.constant.CommonConstants;
 import com.xbh.politemic.common.util.ApiAssert;
@@ -14,10 +15,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @NoticeController: 通知/私信 ctrl
@@ -66,10 +64,8 @@ public class NoticeController {
         String userId = ThreadLocalUtil.getUserId();
         // 用户令牌
         String token = ThreadLocalUtil.getToken();
-        // 获取 通知/私信 详情
-        GetNoticeDetailResponseVO vo = this.noticeSrv.getNoticeDetail(noticeId, userId, token);
-
-        return Result.success(vo);
+        // 获取 通知/私信 详情 返回
+        return Result.success(this.noticeSrv.getNoticeDetail(noticeId, userId, token));
     }
 
     /**
@@ -89,6 +85,20 @@ public class NoticeController {
         String userId = ThreadLocalUtil.getUserId();
 
         return Result.success(this.noticeSrv.pageNotice(vo, userId));
+    }
+
+    @ApiIdempotent(describe = "发送私信 限次时间3s", stintTime = 3L)
+    @PostMapping("sendLetter")
+    @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "用户之间发送私信", remark = "需要登录 幂等性校验3s")
+    public Result sendLetter(@ApiParam SendLetterRequestVO vo) {
+
+        ApiAssert.notNull(vo, "未获取到请求参数!");
+
+        String userId = ThreadLocalUtil.getUserId();
+
+        this.noticeSrv.sendLetter(vo, userId);
+
+        return Result.success();
     }
 
 }
