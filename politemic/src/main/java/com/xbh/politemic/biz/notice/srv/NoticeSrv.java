@@ -6,12 +6,16 @@ import com.xbh.politemic.biz.notice.domain.Notice;
 import com.xbh.politemic.biz.notice.vo.PageNoticeRequestVO;
 import com.xbh.politemic.biz.notice.vo.PageNoticeResponseVO;
 import com.xbh.politemic.biz.notice.vo.SendLetterRequestVO;
+import com.xbh.politemic.biz.user.domain.Follow;
+import com.xbh.politemic.biz.user.srv.BaseFollowSrv;
 import com.xbh.politemic.biz.user.srv.UserSrv;
 import com.xbh.politemic.biz.user.vo.GetNoticeDetailResponseVO;
 import com.xbh.politemic.common.constant.NoticeConstant;
 import com.xbh.politemic.common.enums.notice.NoticeStatusEnum;
 import com.xbh.politemic.common.enums.notice.NoticeTypeEnum;
+import com.xbh.politemic.common.enums.user.FollowStatusEnum;
 import com.xbh.politemic.common.util.PageUtil;
+import com.xbh.politemic.common.util.SensitiveWordFilter;
 import com.xbh.politemic.common.util.ServiceAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,6 +37,8 @@ public class NoticeSrv extends BaseNoticeSrv {
 
     @Autowired
     private UserSrv userSrv;
+    @Autowired
+    private BaseFollowSrv baseFollowSrv;
 
     /**
      * 获取指定用户未读通知个数 通过用户id
@@ -170,8 +176,45 @@ public class NoticeSrv extends BaseNoticeSrv {
      * @author: ZBoHang
      * @time: 2022/1/7 17:23
      */
-    public void sendLetter(SendLetterRequestVO vo, String userId) {
+    @Transactional(rollbackFor = Exception.class)
+    public String sendLetter(SendLetterRequestVO vo, String userId) {
 
+        String toId = vo.getToId();
 
+        String content = vo.getContent();
+
+        Example toExample = Example.builder(Follow.class).build();
+
+        Example.Criteria toCriteria = toExample.createCriteria();
+
+        toCriteria.andEqualTo("followUserId", userId)
+
+                .andEqualTo("followedUserId", toId)
+
+                .andEqualTo("status", FollowStatusEnum.EFFECTIVE.getCode());
+        // 校验是否关注目标用户
+        ServiceAssert.notNull(this.baseFollowSrv.selectOneByExample(toExample), "未关注该用户!");
+
+        Example reExample = Example.builder(Follow.class).build();
+
+        Example.Criteria reCriteria = reExample.createCriteria();
+
+        reCriteria.andEqualTo("followUserId", toId)
+
+                .andEqualTo("followedUserId", userId)
+
+                .andEqualTo("status", FollowStatusEnum.EFFECTIVE.getCode());
+        // 校验是否被目标用户关注
+        ServiceAssert.notNull(this.baseFollowSrv.selectOneByExample(reExample), "未被该用户关注!");
+        // 检测私信内容
+        boolean flag = SensitiveWordFilter.isContainsSensitiveWord(content);
+
+        ServiceAssert.isFalse(flag, "私信内容中含有敏感词汇!");
+        // 构建一个未读的私信
+        Notice notice = NoticeBuilder.buildUnReadStatusLetter(userId, toId, content);
+        // 保存私信
+        this.insert(notice);
+
+        return "私信发送成功!";
     }
 }

@@ -85,4 +85,35 @@ public class NoticeBuilder {
 
         return notice;
     }
+
+    /**
+     * 构建一个未读的私信
+     * @param from 发送方id
+     * @param to 接收方id
+     * @param content 私信内容
+     * @return: com.xbh.politemic.biz.notice.domain.Notice
+     * @author: ZBoHang
+     * @time: 2022/1/17 10:22
+     */
+    public static Notice buildUnReadStatusLetter(String from, String to, String content) {
+
+        Notice notice = null;
+
+        if (StrUtil.isAllNotBlank(from, to, content)) {
+
+            notice = new Notice()
+                    // 通知方 不填为系统通知 有值则为私信(对应用户id)
+                    .setFromId(from)
+                    // 接收方
+                    .setToId(to)
+                    // 通知内容
+                    .setContent(content)
+                    // 时间
+                    .setTime(DateUtil.date())
+                    // 通知状态 0-未读 1-已读 2-删除
+                    .setStatus(NoticeStatusEnum.UNREAD_STATUS.getCode());
+        }
+
+        return notice;
+    }
 }

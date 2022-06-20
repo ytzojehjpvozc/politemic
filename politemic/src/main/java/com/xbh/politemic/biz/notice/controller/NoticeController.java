@@ -87,6 +87,14 @@ public class NoticeController {
         return Result.success(this.noticeSrv.pageNotice(vo, userId));
     }
 
+    /**
+     * 用户之间发送私信
+     * @param vo vo
+     * @return: com.xbh.politemic.common.util.Result
+     * @author: ZBoHang
+     * @time: 2022/1/17 9:40
+     */
+    @ApiOperation("发送私信")
     @ApiIdempotent(describe = "发送私信 限次时间3s", stintTime = 3L)
     @PostMapping("sendLetter")
     @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "用户之间发送私信", remark = "需要登录 幂等性校验3s")
@@ -94,11 +102,13 @@ public class NoticeController {
 
         ApiAssert.notNull(vo, "未获取到请求参数!");
 
+        ApiAssert.noneBlank(vo.getToId(), "未获取到私信目标用户!");
+
+        ApiAssert.noneBlank(vo.getContent(), "未获取到私信内容!");
+
         String userId = ThreadLocalUtil.getUserId();
 
-        this.noticeSrv.sendLetter(vo, userId);
-
-        return Result.success();
+        return Result.success(this.noticeSrv.sendLetter(vo, userId));
     }
 
 }
