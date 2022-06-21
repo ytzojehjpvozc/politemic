@@ -63,6 +63,10 @@
 
 ![关注用户流程](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/followUser.png)
 
+###### 15.私信发送流程
+
+![私信发送流程](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/sendLetter.png)
+
 
 #### 安装教程
 
