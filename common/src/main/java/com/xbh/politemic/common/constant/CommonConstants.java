@@ -72,4 +72,13 @@ public class CommonConstants {
      */
     public static final String REDIS_PRE_KEY_NAME_IDEMPOTENT = "Idempotent-";
 
+    /**
+     * redis中 单日访问量 键模板
+     */
+    public static final String REDIS_KEY_TEMPLATE_SINGLE_DAY_VIEWS = "Single_Day_Views:{}";
+
+    /**
+     * redis中 union操作hyper log 的键 模板
+     */
+    public static final String REDIS_KEY_TEMPLATE_HYPER_LOG_UNION_NAME= "Union_Views:{}:{}";
 }

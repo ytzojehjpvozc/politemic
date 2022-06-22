@@ -1,9 +1,13 @@
 package com.xbh.politemic.interceptor;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import com.xbh.politemic.bean.RedisClient;
 import com.xbh.politemic.biz.log.builder.LogBuilder;
 import com.xbh.politemic.biz.log.domain.SysLog;
 import com.xbh.politemic.biz.log.srv.BaseSysLogSrv;
+import com.xbh.politemic.common.constant.CommonConstants;
 import com.xbh.politemic.common.util.HttpServletUtil;
 import com.xbh.politemic.common.util.ThreadLocalUtil;
 import org.aspectj.lang.JoinPoint;
@@ -37,6 +41,7 @@ public class LogInterceptor {
 
     @Autowired
     private BaseSysLogSrv baseSysLogSrv;
+    @Autowired private RedisClient redisClient;
 
     @Pointcut("@annotation(com.xbh.politemic.common.annotation.SysLog)")
     public void declaratPointCut() {
@@ -51,6 +56,10 @@ public class LogInterceptor {
         String userId = ThreadLocalUtil.getUserId();
         // IP地址
         String ipAddress = HttpServletUtil.getClientIP(request, "");
+        // 处理模板 key
+        String viewsKey = StrUtil.format(CommonConstants.REDIS_KEY_TEMPLATE_SINGLE_DAY_VIEWS, DateUtil.date().toDateStr());
+        // 访问量
+        this.redisClient.addHyperLog(viewsKey, ipAddress);
         // 请求url
         String requestURI = request.getRequestURI();
         // 请求参数

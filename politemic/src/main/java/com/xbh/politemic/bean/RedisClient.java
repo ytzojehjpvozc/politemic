@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -87,5 +88,51 @@ public class RedisClient {
      */
     public Long ssize(String key) {
         return this.redisTemplate.opsForSet().size(key);
+    }
+
+    /**
+     * 新增 统计(类型)
+     * @param key 键
+     * @param value 值
+     * @return: void
+     * @author: ZBoHang
+     * @time: 2022/1/17 13:10
+     */
+    public void addHyperLog(String key, String value) {
+        this.redisTemplate.opsForHyperLogLog().add(key, value);
+    }
+
+    /**
+     * 计数
+     * @param key 键
+     * @return: java.lang.Long
+     * @author: ZBoHang
+     * @time: 2022/1/17 13:25
+     */
+    public Long sizeHyperLog(String key) {
+        return this.redisTemplate.opsForHyperLogLog().size(key);
+    }
+
+    /**
+     * 合并所有旧键结果至新键
+     * @param newKey 新键
+     * @param oldKeyList 旧键集合
+     * @return: java.lang.Long
+     * @author: ZBoHang
+     * @time: 2022/1/17 13:25
+     */
+    public Long unionHyperLog(String newKey, List<String> oldKeyList) {
+        return this.redisTemplate.opsForHyperLogLog().union(newKey, oldKeyList.toArray());
+    }
+
+    /**
+     * 移除指定键
+     * @param key 键
+     * @return: void
+     * @author: ZBoHang
+     * @time: 2022/1/17 13:27
+     */
+    public void deleteHyperLog(String key) {
+        this.redisTemplate.opsForHyperLogLog().delete(key);
     }
 }
