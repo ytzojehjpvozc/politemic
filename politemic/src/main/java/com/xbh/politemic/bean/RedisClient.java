@@ -28,6 +28,15 @@ public class RedisClient {
     }
 
     /**
+     * 获取指定key的生存时间
+     * @author: ZBoHang
+     * @time: 2022/1/17 16:10
+     */
+    public Long ttl(String key) {
+        return this.redisTemplate.opsForValue().getOperations().getExpire(key);
+    }
+
+    /**
      * @description: 设置带有生存时间的 单位: 秒
      * @author: zhengbohang
      * @date: 2021/10/3 19:42
