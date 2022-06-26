@@ -1,8 +1,8 @@
 package com.xbh.politemic;
 
-import com.xbh.politemic.bean.ESClient;
+// import com.xbh.politemic.bean.ESClient;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
@@ -10,8 +10,8 @@ class PolitemicApplicationTests {
 
     // @Autowired
     // LoadingCache<String, String> loadingCache;
-    @Autowired
-    private ESClient esClient;
+    // @Autowired
+    // private ESClient esClient;
 
     @Test
     void contextLoads() throws Exception {
