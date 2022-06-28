@@ -67,12 +67,26 @@
 
 ![私信发送流程](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/sendLetter.png)
 
+###### 16.帖子点赞 / 取消点赞
+
+![帖子点赞 / 取消点赞](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/likePost.png)
+
+###### 17.当天访问量
+
+![当天访问量](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/getTodayViews.png)
+
+###### 17.时间段内访问量
+
+![时间段内访问量](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/getViewsBySegment.png)
+
+
 
 #### 安装教程
 
-1.  JDK1.8、idea
+1.  运行环境JDK1.8、idea2021
 2.  安装rabbitMQ3.9.5(erl 23.2)、redis3.2、mysql8.0.2、elasticsearch7.15.1(必须安装analysis-ik分词插件,可以安装kibana使用它的命令行来测试es)
 3.  sql文件在[common/src/main/schemas/politemic.sql]
+4.  启动项目,浏览器打开[http://localhost:8080/politemic/doc.html]接口文档地址
 
 #### 使用说明
 

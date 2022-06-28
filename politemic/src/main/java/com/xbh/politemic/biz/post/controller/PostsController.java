@@ -112,12 +112,19 @@ public class PostsController {
         return Result.success(this.postSrv.searchPosts(vo));
     }
 
+    /**
+     * 点赞/取消点赞 帖子
+     * @param postId
+     * @return: com.xbh.politemic.common.util.Result
+     * @author: ZBoHang
+     * @time: 2022/2/8 10:43
+     */
     @ApiOperation("点赞/取消点赞 帖子")
     @ApiImplicitParams(
             @ApiImplicitParam(name = "postId", value = "帖子id", paramType = "query")
     )
     @PostMapping("likePost")
-    @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "点赞指定的帖子", remark = "需登录")
+    @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "点赞/取消点赞 指定的帖子", remark = "需登录")
     public Result likePost(String postId) {
 
         ApiAssert.noneBlank(postId, "未获取到帖子id!");
