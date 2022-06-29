@@ -71,13 +71,9 @@
 
 ![帖子点赞 / 取消点赞](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/likePost.png)
 
-###### 17.当天访问量
+###### 17.统计访问量
 
-![当天访问量](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/getTodayViews.png)
-
-###### 17.时间段内访问量
-
-![时间段内访问量](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/getViewsBySegment.png)
+![当天访问量](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/views.png)
 
 
 
