@@ -30,7 +30,7 @@ public class FollowController {
 
     @ApiOperation("关注/取消关注 用户")
     @ApiImplicitParams(
-            @ApiImplicitParam(name = "followedUserId", value = "被关注的用户id", paramType = "query")
+            @ApiImplicitParam(name = "followedUserId", value = "被关注的用户id", paramType = "query", dataTypeClass = String.class)
     )
     @PostMapping("followUser")
     @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "关注或取消关注 用户", remark = "要求用户必须登录才能关注别人")

@@ -29,7 +29,7 @@ public class UserController {
     @Autowired
     private UserSrv userSrv;
 
-    @ApiImplicitParam(name = "test",value = "测试参数",required = true)
+    @ApiImplicitParam(name = "test",value = "测试参数",required = true, dataTypeClass = String.class)
     @ApiOperation(value = "测试接口")
     @PostMapping("test")
     @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "用于测试", remark = "remark")
@@ -76,8 +76,8 @@ public class UserController {
     @NoneNeedLogin
     @ApiOperation(value = "用户激活接口")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "用户id", paramType = "path"),
-            @ApiImplicitParam(name = "activateCode", value = "激活码", paramType = "path")
+            @ApiImplicitParam(name = "id", value = "用户id", paramType = "path", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "activateCode", value = "激活码", paramType = "path", dataTypeClass = String.class)
     })
     @GetMapping("userActivate/{id}/{activateCode}")
     @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "激活账户", remark = "普通用户激活")
@@ -106,7 +106,7 @@ public class UserController {
     @ApiOperation("解除邮箱绑定")
     @ApiImplicitParams(
             {
-                    @ApiImplicitParam(name = "userPass", value = "用户密码", required = false)
+                    @ApiImplicitParam(name = "userPass", value = "用户密码", required = false, dataTypeClass = String.class)
             }
     )
     @PostMapping("unBindMailBox")

@@ -80,7 +80,7 @@ public class PostsController {
      * @time: 2021/12/15 18:04
      */
     @ApiOperation("获取帖子详情")
-    @ApiImplicitParam(name = "postId", value = "帖子id", paramType = "path")
+    @ApiImplicitParam(name = "postId", value = "帖子id", paramType = "path", dataTypeClass = String.class)
     @NoneNeedLogin
     @GetMapping("getPostDetail/{postId}")
     @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "获取帖子详情", remark = "有权限校验")
@@ -121,7 +121,7 @@ public class PostsController {
      */
     @ApiOperation("点赞/取消点赞 帖子")
     @ApiImplicitParams(
-            @ApiImplicitParam(name = "postId", value = "帖子id", paramType = "query")
+            @ApiImplicitParam(name = "postId", value = "帖子id", paramType = "query", dataTypeClass = String.class)
     )
     @PostMapping("likePost")
     @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "点赞/取消点赞 指定的帖子", remark = "需登录")

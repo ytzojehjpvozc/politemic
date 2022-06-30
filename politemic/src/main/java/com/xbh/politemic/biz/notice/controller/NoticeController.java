@@ -54,7 +54,7 @@ public class NoticeController {
      * @time: 2021/12/13 16:39
      */
     @ApiOperation("通知/私信 详情")
-    @ApiImplicitParam(name = "noticeId", value = "通知id", paramType = "path")
+    @ApiImplicitParam(name = "noticeId", value = "通知id", paramType = "path", dataTypeClass = Integer.class)
     @GetMapping("getNoticeDetail/{noticeId}")
     @SysLog(modelName = CommonConstants.USER_MODEL_NAME, behavior = "获取通知/私信详情", remark = "有权限校验")
     public Result getNoticeDetail(@PathVariable(name = "noticeId", required = false) Integer noticeId) {

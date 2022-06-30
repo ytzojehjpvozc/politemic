@@ -52,8 +52,8 @@ public class ViewController {
      */
     @ApiOperation("时间段内的访问量")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "startDateStr", value = "开始日期字符串 yyyy-MM-dd", paramType = "query"),
-            @ApiImplicitParam(name = "endDateStr", value = "结束日期字符串 yyyy-MM-dd", paramType = "query")
+            @ApiImplicitParam(name = "startDateStr", value = "开始日期字符串 yyyy-MM-dd", paramType = "query", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "endDateStr", value = "结束日期字符串 yyyy-MM-dd", paramType = "query", dataTypeClass = String.class)
     })
     @PostMapping("getViewsBySegment")
     @SysLog(modelName = CommonConstants.ADMIN_MODEL_NAME, behavior = "获取一段时间区间的用户访问量", remark = "管理人员才能访问")
