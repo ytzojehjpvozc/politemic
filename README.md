@@ -76,13 +76,13 @@
 
 
 
-![interface_doc001](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/interface_doc001.png)
+![interface_doc](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/interface_doc001.png)
 
 
-![interface_doc002](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/interface_doc002.png)
+![interface_doc](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/interface_doc002.png)
 
 
-![interface_doc003](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/interface_doc003.png)
+![interface_doc](https://gitee.com/zheng-bohang/politemic/raw/master/common/src/main/img/interface_doc003.png)
 
 
 
